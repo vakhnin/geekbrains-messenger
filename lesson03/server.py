@@ -41,3 +41,15 @@ sock.listen(5)
 while True:
     conn, addr = sock.accept()
     print(f'Соединение установлено: {addr}')
+
+    try:
+        while True:
+            try:
+                data = conn.recv(1024)
+                print(data.decode('utf-8'))
+            except ConnectionResetError:
+                err_msg = 'Удаленный хост принудительно разорвал ' + \
+                          'существующее подключение'
+                conn.close()
+    finally:
+        conn.close()
