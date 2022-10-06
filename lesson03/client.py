@@ -20,9 +20,22 @@
 #   -p <port> — TCP-порт для работы (по умолчанию использует 7777);
 #   -a <addr> — IP-адрес для прослушивания (по умолчанию слушает все доступные адреса).
 import sys
+from socket import socket, SOCK_STREAM
 
-addr, port = 'localhost', 7777
-if len(sys.argv) > 1:
-    addr = sys.argv[1]
-if len(sys.argv) > 2:
-    port = int(sys.argv[2])
+try:
+    addr, port = 'localhost', 7777
+    if len(sys.argv) > 1:
+        addr = sys.argv[1]
+    if len(sys.argv) > 2:
+        port = int(sys.argv[2])
+
+    sock = socket(type=SOCK_STREAM)
+    sock.connect((addr, port))
+    print('Соединение с сервером установлено')
+except ConnectionRefusedError:
+    err_msg = 'Подключение не установлено, т.к. конечный компьютер ' + \
+            'отверг запрос на подключение'
+    print(err_msg)
+finally:
+    sock.close()
+    print('Соединение с сервером закрыто')
