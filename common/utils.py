@@ -2,7 +2,7 @@ import argparse
 from datetime import datetime
 import json
 
-from common.vars import DEFAULT_PORT
+from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING
 
 
 # Функции сервера
@@ -56,8 +56,8 @@ def presence_send(sock_, account_name, status):
     msg = json.dumps(jim_msg, separators=(',', ':'))
     sock_.send(msg.encode('utf-8'))
     try:
-        data = sock_.recv(1024)
-        jim_obj = json.loads(data.decode('utf-8'))
+        data = sock_.recv(MAX_PACKAGE_LENGTH)
+        jim_obj = json.loads(data.decode(ENCODING))
         parse_answer(jim_obj)
     except json.JSONDecodeError:
         print('Answer JSON broken')
