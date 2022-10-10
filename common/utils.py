@@ -2,7 +2,7 @@ import argparse
 from datetime import datetime
 import json
 
-from vars import DEFAULT_PORT
+from common.vars import DEFAULT_PORT
 
 
 # Функции сервера
