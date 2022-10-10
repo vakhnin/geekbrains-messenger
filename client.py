@@ -1,7 +1,7 @@
 import sys
 from socket import socket, SOCK_STREAM
 
-from common.utils import presence_send
+from common.utils import parse_answer, make_presence_message, send_message_take_answer
 from common.vars import DEFAULT_IP_ADDRESS, DEFAULT_PORT
 
 try:
@@ -15,7 +15,9 @@ try:
     sock = socket(type=SOCK_STREAM)
     sock.connect((addr, port))
 
-    presence_send(sock, 'C0deMaver1ck', 'Yep, I am here!')
+    message = make_presence_message('C0deMaver1ck', 'Yep, I am here!')
+    answer = send_message_take_answer(sock, message)
+    parse_answer(answer)
 except ConnectionRefusedError:
     err_msg = 'Подключение не установлено, т.к. конечный компьютер ' + \
               'отверг запрос на подключение'

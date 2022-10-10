@@ -79,8 +79,8 @@ def parse_presence(jim_obj_):
 
 
 # Функции клиента
-def presence_send(sock_, account_name, status):
-    jim_msg = {
+def make_presence_message(account_name, status):
+    return {
         'action': 'presence',
         'time': datetime.now().timestamp(),
         'type': 'status',
@@ -89,19 +89,24 @@ def presence_send(sock_, account_name, status):
             'status': status,
         }
     }
-    msg = json.dumps(jim_msg, separators=(',', ':'))
-    sock_.send(msg.encode('utf-8'))
+
+
+def send_message_take_answer(sock, msg):
+    msg = json.dumps(msg, separators=(',', ':'))
     try:
-        data = sock_.recv(MAX_PACKAGE_LENGTH)
-        jim_obj = json.loads(data.decode(ENCODING))
-        parse_answer(jim_obj)
+        sock.send(msg.encode(ENCODING))
+        data = sock.recv(MAX_PACKAGE_LENGTH)
+        return json.loads(data.decode(ENCODING))
     except json.JSONDecodeError:
         print('Answer JSON broken')
 
 
 def parse_answer(jim_obj):
+    if not isinstance(jim_obj, dict):
+        print('Server answer not dict')
+        return
     if 'response' in jim_obj.keys():
-        print(f'Server response: {jim_obj["response"]}')
+        print(f'Server answer: {jim_obj["response"]}')
     else:
         print('Answer has not "response" code')
     if 'error' in jim_obj.keys():
