@@ -19,42 +19,10 @@
 # * имеет параметры командной строки:
 #   -p <port> — TCP-порт для работы (по умолчанию использует 7777);
 #   -a <addr> — IP-адрес для прослушивания (по умолчанию слушает все доступные адреса).
-import json
 import sys
-from datetime import datetime
 from socket import socket, SOCK_STREAM
 
-
-def presence_send(sock_, account_name, status):
-    jim_msg = {
-        'action': 'presence',
-        'time': datetime.now().timestamp(),
-        'type': 'status',
-        'user': {
-            'account_name': account_name,
-            'status': status,
-        }
-    }
-    msg = json.dumps(jim_msg, separators=(',', ':'))
-    sock_.send(msg.encode('utf-8'))
-    try:
-        data = sock.recv(1024)
-        jim_obj = json.loads(data.decode('utf-8'))
-        parse_answer(jim_obj)
-    except json.JSONDecodeError:
-        print('Answer JSON broken')
-
-
-def parse_answer(jim_obj):
-    if 'response' in jim_obj.keys():
-        print(f'Server response: {jim_obj["response"]}')
-    else:
-        print('Answer has not "response" code')
-    if 'error' in jim_obj.keys():
-        print(f'Server error message: {jim_obj["error"]}')
-    if 'alert' in jim_obj.keys():
-        print(f'Server alert message: {jim_obj["alert"]}')
-
+from common.utils import presence_send
 
 try:
     addr, port = 'localhost', 7777

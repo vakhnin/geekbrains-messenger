@@ -1,4 +1,6 @@
 import argparse
+from datetime import datetime
+import json
 
 
 # Функции сервера
@@ -36,3 +38,35 @@ def parse_presence(jim_obj_):
             print(f'Status user{jim_obj_["user"]["account_name"]} is "' +
                   jim_obj_['user']['status'] + '"')
         return make_answer(200)
+
+
+# Функции клиента
+def presence_send(sock_, account_name, status):
+    jim_msg = {
+        'action': 'presence',
+        'time': datetime.now().timestamp(),
+        'type': 'status',
+        'user': {
+            'account_name': account_name,
+            'status': status,
+        }
+    }
+    msg = json.dumps(jim_msg, separators=(',', ':'))
+    sock_.send(msg.encode('utf-8'))
+    try:
+        data = sock_.recv(1024)
+        jim_obj = json.loads(data.decode('utf-8'))
+        parse_answer(jim_obj)
+    except json.JSONDecodeError:
+        print('Answer JSON broken')
+
+
+def parse_answer(jim_obj):
+    if 'response' in jim_obj.keys():
+        print(f'Server response: {jim_obj["response"]}')
+    else:
+        print('Answer has not "response" code')
+    if 'error' in jim_obj.keys():
+        print(f'Server error message: {jim_obj["error"]}')
+    if 'alert' in jim_obj.keys():
+        print(f'Server alert message: {jim_obj["alert"]}')
