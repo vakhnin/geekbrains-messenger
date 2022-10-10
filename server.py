@@ -2,15 +2,15 @@ import json
 import sys
 from socket import socket, SOCK_STREAM
 
-from common.utils import create_parser, make_answer, parse_presence
-from common.vars import MAX_PACKAGE_LENGTH, ENCODING
+from common.utils import create_parser, parse_received_bytes, choice_jim_action
+from common.vars import MAX_PACKAGE_LENGTH, ENCODING, MAX_CONNECTIONS
 
 parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
 
 sock = socket(type=SOCK_STREAM)
 sock.bind((namespace.a, namespace.p))
-sock.listen(5)
+sock.listen(MAX_CONNECTIONS)
 
 while True:
     conn, addr = sock.accept()
@@ -22,23 +22,8 @@ while True:
                 data = conn.recv(MAX_PACKAGE_LENGTH)
                 if not data:
                     break
-                jim_obj = json.loads(data.decode(ENCODING))
-                if 'action' not in jim_obj.keys():
-                    answer = make_answer(400,
-                                         {'error': 'Request has no "action"'})
-                elif 'time' not in jim_obj.keys():
-                    answer = make_answer(400,
-                                         {'error': 'Request has no "time""'})
-                else:
-                    if jim_obj['action'] == 'presence':
-                        answer = parse_presence(jim_obj)
-                    else:
-                        answer = make_answer(400,
-                                             {'error': 'Unknown action'})
-                answer = json.dumps(answer, separators=(',', ':'))
-                conn.send(answer.encode('utf-8'))
-            except json.JSONDecodeError:
-                answer = make_answer(400, {'error': 'JSON broken'})
+                jim_obj = parse_received_bytes(data)
+                answer = choice_jim_action(jim_obj)
                 answer = json.dumps(answer, separators=(',', ':'))
                 conn.send(answer.encode(ENCODING))
             except ConnectionResetError:

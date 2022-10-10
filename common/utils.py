@@ -2,7 +2,8 @@ import argparse
 from datetime import datetime
 import json
 
-from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING
+from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION
 
 
 # Функции сервера
@@ -11,6 +12,34 @@ def create_parser():
     parser_.add_argument('-a', default='')
     parser_.add_argument('-p', type=int, default=DEFAULT_PORT)
     return parser_
+
+
+def parse_received_bytes(data):
+    if not isinstance(data, bytes):
+        return NOT_BYTES
+    try:
+        jim_obj = json.loads(data.decode(ENCODING))
+        if not isinstance(jim_obj, dict):
+            return NOT_DICT
+        elif 'action' not in jim_obj.keys():
+            return NO_ACTION
+        elif 'time' not in jim_obj.keys():
+            return NO_TIME
+        return jim_obj
+    except json.JSONDecodeError:
+        return BROKEN_JIM
+
+
+def choice_jim_action(jim_obj):
+    if jim_obj == NOT_BYTES:
+        return make_answer(500, {})
+    elif jim_obj in (NO_ACTION, NO_TIME, BROKEN_JIM):
+        return make_answer(400, {'error': jim_obj})
+    else:
+        if jim_obj['action'] == 'presence':
+            return parse_presence(jim_obj)
+        else:
+            return make_answer(400, {'error': UNKNOWN_ACTION})
 
 
 def make_answer(code, message=None):
