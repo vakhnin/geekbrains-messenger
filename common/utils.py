@@ -1,17 +1,24 @@
 import argparse
-from datetime import datetime
 import json
+import sys
+from datetime import datetime
+from socket import socket, SOCK_STREAM
 
 from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
-    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
 
 
 # Функции сервера
-def create_parser():
-    parser_ = argparse.ArgumentParser()
-    parser_.add_argument('-a', default='')
-    parser_.add_argument('-p', type=int, default=DEFAULT_PORT)
-    return parser_
+def make_listen_socket():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', default='')
+    parser.add_argument('-p', type=int, default=DEFAULT_PORT)
+    namespace = parser.parse_args(sys.argv[1:])
+
+    sock = socket(type=SOCK_STREAM)
+    sock.bind((namespace.a, namespace.p))
+    sock.listen(MAX_CONNECTIONS)
+    return sock
 
 
 def parse_received_bytes(data):
