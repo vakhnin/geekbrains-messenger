@@ -2,12 +2,14 @@ import argparse
 from datetime import datetime
 import json
 
+from vars import DEFAULT_PORT
+
 
 # Функции сервера
 def create_parser():
     parser_ = argparse.ArgumentParser()
     parser_.add_argument('-a', default='')
-    parser_.add_argument('-p', type=int, default=7777)
+    parser_.add_argument('-p', type=int, default=DEFAULT_PORT)
     return parser_
 
 

@@ -1,29 +1,9 @@
-# Реализовать простое клиент-серверное взаимодействие по протоколу JIM (JSON instant messaging):
-#
-# * клиент отправляет запрос серверу;
-# * сервер отвечает соответствующим кодом результата.
-#
-# Клиент и сервер должны быть реализованы в виде отдельных скриптов,
-# содержащих соответствующие функции.
-# Функции клиента:
-# * сформировать presence-сообщение;
-# * отправить сообщение серверу;
-# * получить ответ сервера; разобрать сообщение сервера;
-# * параметры командной строки скрипта client.py <addr> [<port>]:
-#   addr — ip-адрес сервера;
-#   port — tcp-порт на сервере, по умолчанию 7777.
-# Функции сервера:
-# * принимает сообщение клиента;
-# * формирует ответ клиенту;
-# * отправляет ответ клиенту;
-# * имеет параметры командной строки:
-#   -p <port> — TCP-порт для работы (по умолчанию использует 7777);
-#   -a <addr> — IP-адрес для прослушивания (по умолчанию слушает все доступные адреса).
 import json
 import sys
 from socket import socket, SOCK_STREAM
 
 from common.utils import create_parser, make_answer, parse_presence
+from common.vars import MAX_PACKAGE_LENGTH, ENCODING
 
 parser = create_parser()
 namespace = parser.parse_args(sys.argv[1:])
@@ -39,10 +19,10 @@ while True:
     try:
         while True:
             try:
-                data = conn.recv(1024)
+                data = conn.recv(MAX_PACKAGE_LENGTH)
                 if not data:
                     break
-                jim_obj = json.loads(data.decode('utf-8'))
+                jim_obj = json.loads(data.decode(ENCODING))
                 if 'action' not in jim_obj.keys():
                     answer = make_answer(400,
                                          {'error': 'Request has no "action"'})
@@ -60,7 +40,7 @@ while True:
             except json.JSONDecodeError:
                 answer = make_answer(400, {'error': 'JSON broken'})
                 answer = json.dumps(answer, separators=(',', ':'))
-                conn.send(answer.encode('utf-8'))
+                conn.send(answer.encode(ENCODING))
             except ConnectionResetError:
                 err_msg = 'Удаленный хост принудительно разорвал ' + \
                           'существующее подключение'
