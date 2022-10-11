@@ -5,7 +5,7 @@ from datetime import datetime
 from socket import socket, SOCK_STREAM
 
 from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
-    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, DEFAULT_IP_ADDRESS
 
 
 # Функции сервера
@@ -79,6 +79,19 @@ def parse_presence(jim_obj_):
 
 
 # Функции клиента
+def make_sent_socket():
+    addr, port = DEFAULT_IP_ADDRESS, DEFAULT_PORT
+    if len(sys.argv) > 1:
+        addr = sys.argv[1]
+    if len(sys.argv) > 2:
+        port = int(sys.argv[2])
+
+    sock = socket(type=SOCK_STREAM)
+    sock.connect((addr, port))
+
+    return sock
+
+
 def make_presence_message(account_name, status):
     return {
         'action': 'presence',

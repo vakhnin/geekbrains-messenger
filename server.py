@@ -1,7 +1,7 @@
 import json
 
 from common.utils import parse_received_bytes, choice_jim_action, make_listen_socket
-from common.vars import MAX_PACKAGE_LENGTH, ENCODING, MAX_CONNECTIONS
+from common.vars import MAX_PACKAGE_LENGTH, ENCODING
 
 
 def main():
