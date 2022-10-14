@@ -1,11 +1,16 @@
 import argparse
 import json
 import sys
+import logging
 from datetime import datetime
 from socket import socket, SOCK_STREAM
 
-from common.vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
+from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
     NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, DEFAULT_IP_ADDRESS
+
+import logs.client_log_config
+
+log = logging.getLogger('messenger.client')
 
 
 # Функции сервера
@@ -111,7 +116,8 @@ def send_message_take_answer(sock, msg):
         data = sock.recv(MAX_PACKAGE_LENGTH)
         return json.loads(data.decode(ENCODING))
     except json.JSONDecodeError:
-        print('Answer JSON broken')
+        log.error('Answer JSON broken')
+        return {}
 
 
 def parse_answer(jim_obj):
