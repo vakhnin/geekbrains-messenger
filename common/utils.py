@@ -9,8 +9,10 @@ from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
     NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, DEFAULT_IP_ADDRESS
 
 import logs.client_log_config
+import logs.server_log_config
 
 log = logging.getLogger('messenger.client')
+server_log = logging.getLogger('messenger.server')
 
 
 # Функции сервера
@@ -39,6 +41,7 @@ def parse_received_bytes(data):
             return NO_TIME
         return jim_obj
     except json.JSONDecodeError:
+        server_log.error(BROKEN_JIM)
         return BROKEN_JIM
 
 
@@ -75,10 +78,10 @@ def parse_presence(jim_obj_):
     elif not jim_obj_['user']['account_name']:
         return make_answer(400, {'error': '"account_name" is empty'})
     else:
-        print(f'User {jim_obj_["user"]["account_name"]} is presence')
+        server_log.debug(f'User {jim_obj_["user"]["account_name"]} is presence')
         if 'status' in jim_obj_['user'].keys() \
                 and jim_obj_['user']['status']:
-            print(f'Status user{jim_obj_["user"]["account_name"]} is "' +
+            server_log.debug(f'Status user{jim_obj_["user"]["account_name"]} is "' +
                   jim_obj_['user']['status'] + '"')
         return make_answer(200)
 
@@ -122,13 +125,13 @@ def send_message_take_answer(sock, msg):
 
 def parse_answer(jim_obj):
     if not isinstance(jim_obj, dict):
-        print('Server answer not dict')
+        log.error('Server answer not dict')
         return
     if 'response' in jim_obj.keys():
-        print(f'Server answer: {jim_obj["response"]}')
+        log.error(f'Server answer: {jim_obj["response"]}')
     else:
-        print('Answer has not "response" code')
+        log.error('Answer has not "response" code')
     if 'error' in jim_obj.keys():
-        print(f'Server error message: {jim_obj["error"]}')
+        log.error(f'Server error message: {jim_obj["error"]}')
     if 'alert' in jim_obj.keys():
-        print(f'Server alert message: {jim_obj["alert"]}')
+        log.error(f'Server alert message: {jim_obj["alert"]}')
