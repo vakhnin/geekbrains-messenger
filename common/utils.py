@@ -11,7 +11,7 @@ from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
 import logs.client_log_config
 import logs.server_log_config
 
-log = logging.getLogger('messenger.client')
+client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')
 
 
@@ -119,19 +119,19 @@ def send_message_take_answer(sock, msg):
         data = sock.recv(MAX_PACKAGE_LENGTH)
         return json.loads(data.decode(ENCODING))
     except json.JSONDecodeError:
-        log.error('Answer JSON broken')
+        client_log.error('Answer JSON broken')
         return {}
 
 
 def parse_answer(jim_obj):
     if not isinstance(jim_obj, dict):
-        log.error('Server answer not dict')
+        client_log.error('Server answer not dict')
         return
     if 'response' in jim_obj.keys():
-        log.error(f'Server answer: {jim_obj["response"]}')
+        client_log.error(f'Server answer: {jim_obj["response"]}')
     else:
-        log.error('Answer has not "response" code')
+        client_log.error('Answer has not "response" code')
     if 'error' in jim_obj.keys():
-        log.error(f'Server error message: {jim_obj["error"]}')
+        client_log.error(f'Server error message: {jim_obj["error"]}')
     if 'alert' in jim_obj.keys():
-        log.error(f'Server alert message: {jim_obj["alert"]}')
+        client_log.error(f'Server alert message: {jim_obj["alert"]}')
