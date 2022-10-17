@@ -3,6 +3,7 @@ import functools
 import json
 import sys
 import logging
+import traceback
 from datetime import datetime
 from socket import socket, SOCK_STREAM
 
@@ -29,6 +30,8 @@ class Log:
         else:
             logger = client_log
         res = self.func(*args, **kwargs)
+        logger.debug((f'Функция {self.func.__name__}() '
+                      f'вызвана из функции {traceback.extract_stack()[-2].name}()'))
         logger.debug(f'Функция: {self.func.__name__}({args}, {kwargs}) = {res}')
         return res
 
