@@ -128,7 +128,7 @@ def parse_answer(jim_obj):
         client_log.error('Server answer not dict')
         return
     if 'response' in jim_obj.keys():
-        client_log.error(f'Server answer: {jim_obj["response"]}')
+        client_log.debug(f'Server answer: {jim_obj["response"]}')
     else:
         client_log.error('Answer has not "response" code')
     if 'error' in jim_obj.keys():
