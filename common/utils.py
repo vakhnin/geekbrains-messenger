@@ -1,7 +1,9 @@
 import argparse
+import functools
 import json
 import sys
 import logging
+import traceback
 from datetime import datetime
 from socket import socket, SOCK_STREAM
 
@@ -11,11 +13,31 @@ from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
 import logs.client_log_config
 import logs.server_log_config
 
-log = logging.getLogger('messenger.client')
+client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')
 
 
+class Log:
+    """Класс-декоратор"""
+
+    def __init__(self, func):
+        functools.update_wrapper(self, func)
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        if sys.argv[0].endswith('server.py'):
+            logger = server_log
+        else:
+            logger = client_log
+        res = self.func(*args, **kwargs)
+        logger.debug((f'Функция {self.func.__name__}() '
+                      f'вызвана из функции {traceback.extract_stack()[-2].name}()'))
+        logger.debug(f'Функция: {self.func.__name__}({args}, {kwargs}) = {res}')
+        return res
+
+
 # Функции сервера
+@Log
 def make_listen_socket():
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', default='')
@@ -28,6 +50,7 @@ def make_listen_socket():
     return sock
 
 
+@Log
 def parse_received_bytes(data):
     if not isinstance(data, bytes):
         return NOT_BYTES
@@ -45,6 +68,7 @@ def parse_received_bytes(data):
         return BROKEN_JIM
 
 
+@Log
 def choice_jim_action(jim_obj):
     if jim_obj == NOT_BYTES:
         return make_answer(500, {})
@@ -57,6 +81,7 @@ def choice_jim_action(jim_obj):
             return make_answer(400, {'error': UNKNOWN_ACTION})
 
 
+@Log
 def make_answer(code, message=None):
     answer_ = {'response': code}
     if not message:
@@ -68,6 +93,7 @@ def make_answer(code, message=None):
     return answer_
 
 
+@Log
 def parse_presence(jim_obj_):
     if 'user' not in jim_obj_.keys():
         return make_answer(400, {'error': 'Request has no "user"'})
@@ -82,11 +108,12 @@ def parse_presence(jim_obj_):
         if 'status' in jim_obj_['user'].keys() \
                 and jim_obj_['user']['status']:
             server_log.debug(f'Status user{jim_obj_["user"]["account_name"]} is "' +
-                  jim_obj_['user']['status'] + '"')
+                             jim_obj_['user']['status'] + '"')
         return make_answer(200)
 
 
 # Функции клиента
+@Log
 def make_sent_socket():
     addr, port = DEFAULT_IP_ADDRESS, DEFAULT_PORT
     if len(sys.argv) > 1:
@@ -100,6 +127,7 @@ def make_sent_socket():
     return sock
 
 
+@Log
 def make_presence_message(account_name, status):
     return {
         'action': 'presence',
@@ -112,6 +140,7 @@ def make_presence_message(account_name, status):
     }
 
 
+@Log
 def send_message_take_answer(sock, msg):
     msg = json.dumps(msg, separators=(',', ':'))
     try:
@@ -119,19 +148,20 @@ def send_message_take_answer(sock, msg):
         data = sock.recv(MAX_PACKAGE_LENGTH)
         return json.loads(data.decode(ENCODING))
     except json.JSONDecodeError:
-        log.error('Answer JSON broken')
+        client_log.error('Answer JSON broken')
         return {}
 
 
+@Log
 def parse_answer(jim_obj):
     if not isinstance(jim_obj, dict):
-        log.error('Server answer not dict')
+        client_log.error('Server answer not dict')
         return
     if 'response' in jim_obj.keys():
-        log.error(f'Server answer: {jim_obj["response"]}')
+        client_log.debug(f'Server answer: {jim_obj["response"]}')
     else:
-        log.error('Answer has not "response" code')
+        client_log.error('Answer has not "response" code')
     if 'error' in jim_obj.keys():
-        log.error(f'Server error message: {jim_obj["error"]}')
+        client_log.error(f'Server error message: {jim_obj["error"]}')
     if 'alert' in jim_obj.keys():
-        log.error(f'Server alert message: {jim_obj["alert"]}')
+        client_log.error(f'Server alert message: {jim_obj["alert"]}')
