@@ -1,14 +1,15 @@
 import argparse
 import functools
 import json
+import re
 import sys
 import logging
+import time
 import traceback
-from datetime import datetime
 from socket import socket, SOCK_STREAM
 
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
-    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, DEFAULT_IP_ADDRESS
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
 
 import logs.client_log_config
 import logs.server_log_config
@@ -47,6 +48,7 @@ def make_listen_socket():
     sock = socket(type=SOCK_STREAM)
     sock.bind((namespace.a, namespace.p))
     sock.listen(MAX_CONNECTIONS)
+    sock.settimeout(0.2)
     return sock
 
 
@@ -82,61 +84,142 @@ def choice_jim_action(jim_obj):
 
 
 @Log
-def make_answer(code, message=None):
-    answer_ = {'response': code}
-    if not message:
-        return answer_
+def make_answer(code, message={}):
+    answer = {'response': code}
     if 'error' in message.keys():
-        answer_['error'] = message['error']
+        answer['error'] = message['error']
     elif 'alert' in message.keys():
-        answer_['alert'] = message['alert']
-    return answer_
+        answer['alert'] = message['alert']
+    return answer
 
 
 @Log
-def parse_presence(jim_obj_):
-    if 'user' not in jim_obj_.keys():
+def parse_presence(jim_obj):
+    if 'user' not in jim_obj.keys():
         return make_answer(400, {'error': 'Request has no "user"'})
-    elif type(jim_obj_['user']) != dict:
+    elif type(jim_obj['user']) != dict:
         return make_answer(400, {'error': '"user" is not dict'})
-    elif 'account_name' not in jim_obj_['user'].keys():
+    elif 'account_name' not in jim_obj['user'].keys():
         return make_answer(400, {'error': '"user" has no "account_name"'})
-    elif not jim_obj_['user']['account_name']:
+    elif not jim_obj['user']['account_name']:
         return make_answer(400, {'error': '"account_name" is empty'})
     else:
-        server_log.debug(f'User {jim_obj_["user"]["account_name"]} is presence')
-        if 'status' in jim_obj_['user'].keys() \
-                and jim_obj_['user']['status']:
-            server_log.debug(f'Status user{jim_obj_["user"]["account_name"]} is "' +
-                             jim_obj_['user']['status'] + '"')
+        print(f'User {jim_obj["user"]["account_name"]} is presence')
+        if 'status' in jim_obj['user'].keys() \
+                and jim_obj['user']['status']:
+            print(f'Status user{jim_obj["user"]["account_name"]} is "' +
+                  jim_obj['user']['status'] + '"')
         return make_answer(200)
+
+
+@Log
+def read_requests(r_clients, clients_data):
+    for sock in r_clients:
+        if sock not in clients_data.keys():
+            return
+        try:
+            msg = sock.recv(MAX_PACKAGE_LENGTH).decode('utf-8')
+            try:
+                jim_obj = json.loads(msg)
+            except json.JSONDecodeError:
+                server_log.error(f'Brocken jim {msg}')
+                continue
+
+            answer = make_answer(200)
+            answer = json.dumps(answer, separators=(',', ':'))
+            clients_data[sock]['answ_for_send'].append(answer)
+
+            if not isinstance(jim_obj, dict):
+                server_log.error(f'Data not dict {jim_obj}')
+                continue
+            if 'action' in jim_obj.keys():
+                if jim_obj['action'] == 'presence':
+                    if 'user' in jim_obj.keys() \
+                            and isinstance(jim_obj['user'], dict) \
+                            and 'client_name' in jim_obj['user'].keys():
+                        clients_data[sock]['client_name'] = \
+                            jim_obj['user']['client_name']
+                        continue
+                elif jim_obj['action'] == 'msg':
+                    for _, value in clients_data.items():
+                        if jim_obj['to'] == '#' \
+                                or jim_obj['to'] == value['client_name']:
+                            value['msg_for_send'].append(msg)
+        except Exception:
+            print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
+            sock.close()
+            del clients_data[sock]
+
+
+@Log
+def write_responses(w_clients, clients_data):
+    for sock in w_clients:
+        if sock not in clients_data.keys():
+            return
+        try:
+            if len(clients_data[sock]['answ_for_send']):
+                msg = clients_data[sock]['answ_for_send'].pop()
+                sock.send(msg.encode('utf-8'))
+            elif len(clients_data[sock]['msg_for_send']):
+                msg = clients_data[sock]['msg_for_send'].pop()
+                sock.send(msg.encode('utf-8'))
+        except Exception:
+            print(
+                f'Клиент {sock.fileno()} {sock.getpeername()} отключился'
+            )
+            sock.close()
+            del clients_data[sock]
 
 
 # Функции клиента
 @Log
-def make_sent_socket():
-    addr, port = DEFAULT_IP_ADDRESS, DEFAULT_PORT
-    if len(sys.argv) > 1:
-        addr = sys.argv[1]
-    if len(sys.argv) > 2:
-        port = int(sys.argv[2])
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', default='localhost')
+    parser.add_argument('-n', default='Guest')
+    parser.add_argument('-p', type=int, default=DEFAULT_PORT)
+    namespace = parser.parse_args(sys.argv[1:])
 
-    sock = socket(type=SOCK_STREAM)
-    sock.connect((addr, port))
-
-    return sock
+    return namespace.a, namespace.p, namespace.n
 
 
 @Log
-def make_presence_message(account_name, status):
+def parse_answer(jim_obj):
+    if not isinstance(jim_obj, dict):
+        print('Server answer not dict')
+        return
+    if 'response' in jim_obj.keys():
+        print(f'Server answer: {jim_obj["response"]}')
+    else:
+        print('Answer has not "response" code')
+    if 'error' in jim_obj.keys():
+        print(f'Server error message: {jim_obj["error"]}')
+    if 'alert' in jim_obj.keys():
+        print(f'Server alert message: {jim_obj["alert"]}')
+
+
+@Log
+def make_presence_message(client_name, status):
     return {
         'action': 'presence',
-        'time': datetime.now().timestamp(),
+        'time': time.time(),
         'type': 'status',
         'user': {
-            'account_name': account_name,
+            'client_name': client_name,
             'status': status,
         }
+    }
+
+
+@Log
+def make_msg_message(client_name, msg, to='#'):
+    return {
+        'action': 'msg',
+        'time': time.time(),
+        'to': to,
+        'from': client_name,
+        'encoding': 'utf-8',
+        'message': msg,
     }
 
 
@@ -153,15 +236,81 @@ def send_message_take_answer(sock, msg):
 
 
 @Log
-def parse_answer(jim_obj):
-    if not isinstance(jim_obj, dict):
-        client_log.error('Server answer not dict')
-        return
-    if 'response' in jim_obj.keys():
-        client_log.debug(f'Server answer: {jim_obj["response"]}')
-    else:
-        client_log.error('Answer has not "response" code')
-    if 'error' in jim_obj.keys():
-        client_log.error(f'Server error message: {jim_obj["error"]}')
-    if 'alert' in jim_obj.keys():
-        client_log.error(f'Server alert message: {jim_obj["alert"]}')
+def cmd_help():
+    print('Поддерживаемые команды:')
+    print('m [сообщение] - отправить сообщение в общий чат.')
+    print('p [получатель] [сообщение] - отправить приватное сообщение.')
+    print('help - вывести подсказки по командам')
+    print('exit - выход из программы')
+
+
+@Log
+def user_input(sock, client_name):
+    try:
+        cmd_help()
+        while True:
+            msg = input('Введите команду: \n')
+            msg = msg.strip()
+            msg = re.split('\\s+', msg)
+            if msg[0] == 'exit':
+                break
+            elif msg[0] == 'help':
+                cmd_help()
+                continue
+            elif msg[0] == 'm':
+                if len(msg) < 2:
+                    print('Неверное количество аргументов команды.'
+                          'Введите "help" для вывода списка команд')
+                    continue
+                msg = make_msg_message(client_name, ' '.join(msg[1:]))
+            elif msg[0] == 'p':
+                if len(msg) < 3:
+                    print('Неверное количество аргументов команды.'
+                          'Введите "help" для вывода списка команд')
+                    continue
+                msg = make_msg_message(client_name, ' '.join(msg[2:]), msg[1])
+            else:
+                print('Команда не распознана. '
+                      'Введите "help" для вывода списка команд')
+                continue
+
+            msg = json.dumps(msg, separators=(',', ':'))
+            sock.send(msg.encode(ENCODING))
+    except Exception as e:
+        client_log.debug(f'Ошибка выходного потока {e}')
+
+
+@Log
+def user_output(sock, client_name):
+    try:
+        while True:
+            data = sock.recv(MAX_PACKAGE_LENGTH)
+            if not data:
+                break
+            try:
+                jim_obj = json.loads(data.decode(ENCODING))
+            except json.JSONDecodeError:
+                client_log.error(f'Brocken jim {data}')
+                continue
+            if not isinstance(jim_obj, dict):
+                client_log.error(f'Data not dict {jim_obj}')
+                continue
+            if 'response' in jim_obj.keys():
+                client_log.debug(f'Получен ответ сервера {jim_obj["response"]}')
+                continue
+            if 'action' in jim_obj.keys():
+                if jim_obj['action'] == 'msg':
+                    if 'from' in jim_obj.keys() \
+                            and 'message' in jim_obj.keys():
+                        if 'to' in jim_obj.keys() \
+                                and jim_obj['to'] == '#':
+                            print(
+                                f'{jim_obj["from"]}> {jim_obj["message"]}'
+                            )
+                        else:
+                            print(
+                                f'{jim_obj["from"]} (private)> '
+                                f'{jim_obj["message"]}'
+                            )
+    except Exception as e:
+        client_log.debug(f'Ошибка входного потока{e}')
