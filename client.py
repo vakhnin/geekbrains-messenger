@@ -1,38 +1,54 @@
+import json
 import logging
+import threading
+import time
+from socket import socket, AF_INET, SOCK_STREAM
 
-from common.utils import parse_answer, make_presence_message, \
-    send_message_take_answer, make_sent_socket
+from common.utils import make_presence_message, \
+    send_message_take_answer, parse_args, user_input, user_output
 import logs.client_log_config
+from common.vars import ENCODING
 
 log = logging.getLogger('messenger.client')
 
 
 def main():
+    address, port, client_name = parse_args()
+
     try:
-        log.debug('Старт клиента')
-        sock = make_sent_socket()
-
-        message = make_presence_message('C0deMaver1ck', 'Yep, I am here!')
+        print('Консольный месседжер. Клиентский модуль.')
+        sock = socket(AF_INET, SOCK_STREAM)
+        sock.connect((address, port))
+        message = make_presence_message(client_name, 'I am here!')
         answer = send_message_take_answer(sock, message)
-        parse_answer(answer)
-
-        sock.close()
-    except KeyboardInterrupt:
-        log.debug('Canceled by keyboard')
-        exit(1)
-    except ConnectionRefusedError:
-        err_msg = 'Подключение не установлено, т.к. конечный компьютер ' + \
-                  'отверг запрос на подключение'
-        log.error(err_msg)
-        exit(1)
-    except ConnectionResetError:
-        err_msg = 'Удаленный хост принудительно разорвал ' + \
-                  'существующее подключение'
-        log.error(err_msg)
-        sock.close()
-        exit(1)
+        message = json.dumps(message, separators=(',', ':'))
+        sock.send(message.encode(ENCODING))
+        print('Установлено соединение с сервером.')
+        log.info(
+            f'Запущен клиент с парамертами: адрес сервера: {address}, '
+            f'порт: {port}, имя пользователя: {client_name}')
+        log.info(f'Установлено соединение с сервером. Ответ сервера: {answer}')
+        print(f'\nПривет {client_name}!\n')
     except Exception as e:
-        log.error(f'Unknown error "{e}"')
+        print('Соединение с сервером не установлено.')
+        log.error(f'Соединение с сервером не установлено. Ошибка {e}')
+    else:
+        sender = threading.Thread(
+            target=user_input, args=(sock, client_name))
+        sender.daemon = True
+        sender.start()
+
+        receiver = threading.Thread(
+            target=user_output, args=(sock, client_name))
+        receiver.daemon = True
+        receiver.start()
+        log.debug('Запущены процессы')
+
+        while True:
+            time.sleep(10)
+            if sender.is_alive() and receiver.is_alive():
+                continue
+            break
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import logging
 import os
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler, RotatingFileHandler
 
 LOG = logging.getLogger('messenger.server')
 
@@ -18,4 +18,4 @@ ROTATION_LOGGING_HANDLER = \
 ROTATION_LOGGING_HANDLER.setFormatter(FORMATTER)
 LOG.addHandler(ROTATION_LOGGING_HANDLER)
 
-LOG.setLevel(logging.DEBUG)
+LOG.setLevel(logging.CRITICAL)

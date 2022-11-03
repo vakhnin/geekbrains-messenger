@@ -18,4 +18,4 @@ ROTATION_FILE_HANDLER = \
 ROTATION_FILE_HANDLER.setFormatter(FORMATTER)
 log.addHandler(ROTATION_FILE_HANDLER)
 
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.CRITICAL)
