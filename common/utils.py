@@ -1,9 +1,9 @@
 import argparse
 import functools
 import json
+import logging
 import re
 import sys
-import logging
 import time
 import traceback
 from socket import socket, SOCK_STREAM
@@ -37,19 +37,49 @@ class Log:
         return res
 
 
-# Функции сервера
-@Log
-def make_listen_socket():
+# Функции и классы сервера
+class PortDesc:
+    def __init__(self):
+        super().__init__()
+        self._port = None
+
+    def __set__(self, instance, port):
+        if type(port) != int or port < 0:
+            raise TypeError(f'Неверный номер порта: {port}. '
+                            f'Номер порта должен быть целым числом, большим нуля.')
+        self._port = port
+
+    def __get__(self, instance, instance_type):
+        return self._port
+
+
+class ServerSocket:
+    _port = PortDesc()
+
+    def __init__(self, addr='', port=7777):
+        self._addr = addr
+        self._port = port
+        self._sock = None
+
+    def start_socket(self):
+        self._sock = socket(type=SOCK_STREAM)
+        self._sock.bind((self._addr, self._port))
+        self._sock.listen(MAX_CONNECTIONS)
+        self._sock.settimeout(0.5)
+
+    def accept(self):
+        return self._sock.accept()
+
+
+def get_server_param():
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', default='')
     parser.add_argument('-p', type=int, default=DEFAULT_PORT)
     namespace = parser.parse_args(sys.argv[1:])
-
-    sock = socket(type=SOCK_STREAM)
-    sock.bind((namespace.a, namespace.p))
-    sock.listen(MAX_CONNECTIONS)
-    sock.settimeout(0.2)
-    return sock
+    return {
+        'addr': namespace.a,
+        'port': namespace.p
+    }
 
 
 @Log

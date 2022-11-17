@@ -4,7 +4,7 @@ from collections import deque
 import select
 
 import logs.server_log_config
-from common.utils import make_listen_socket, read_requests, write_responses
+from common.utils import read_requests, write_responses, get_server_param, ServerSocket
 
 log = logging.getLogger('messenger.server')
 
@@ -14,15 +14,17 @@ def main():
     print('Старт сервера')
 
     clients_data = {}
-    sock = make_listen_socket()
+    server_param = get_server_param()
+    server_sock = ServerSocket(addr=server_param['addr'], port=server_param['port'])
+    server_sock.start_socket()
     while True:
         try:
-            conn, addr = sock.accept()
+            conn, addr = server_sock.accept()
             print(f'Соединение установлено: {addr}')
         except OSError:
             pass
         else:
-            print('Получен запрос на соединение от %s' % str(addr))
+            print(f'Получен запрос на соединение от {addr}')
             clients_data[conn] = \
                 {
                     'client_name': '',
