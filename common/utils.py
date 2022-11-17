@@ -45,7 +45,7 @@ class PortDesc:
 
     def __set__(self, instance, port):
         if type(port) != int or port < 0:
-            raise TypeError(f'Неверный номер порта: {port}. '
+            raise ValueError(f'Неверный номер порта: {port}. '
                             f'Номер порта должен быть целым числом, большим нуля.')
         self._port = port
 
