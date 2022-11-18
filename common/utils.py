@@ -8,6 +8,7 @@ import time
 import traceback
 from socket import socket, SOCK_STREAM
 
+from .metaclasses import ServerVerifier
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
     NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
 
@@ -46,14 +47,14 @@ class PortDesc:
     def __set__(self, instance, port):
         if type(port) != int or port < 0:
             raise ValueError(f'Неверный номер порта: {port}. '
-                            f'Номер порта должен быть целым числом, большим нуля.')
+                             f'Номер порта должен быть целым числом, большим или равным нулю.')
         self._port = port
 
     def __get__(self, instance, instance_type):
         return self._port
 
 
-class ServerSocket:
+class ServerSocket(metaclass=ServerVerifier):
     _port = PortDesc()
 
     def __init__(self, addr='', port=7777):
