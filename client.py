@@ -5,7 +5,7 @@ import time
 from socket import socket, AF_INET, SOCK_STREAM
 
 from common.utils import make_presence_message, \
-    send_message_take_answer, parse_args, user_input, user_output
+    send_message_take_answer, parse_args, user_input, user_output, Client
 import logs.client_log_config
 from common.vars import ENCODING
 
@@ -18,11 +18,12 @@ def main():
     try:
         print('Консольный месседжер. Клиентский модуль.')
         sock = socket(AF_INET, SOCK_STREAM)
-        sock.connect((address, port))
+        client = Client(sock)
+        client.connect((address, port))
         message = make_presence_message(client_name, 'I am here!')
-        answer = send_message_take_answer(sock, message)
+        answer = send_message_take_answer(client.sock, message)
         message = json.dumps(message, separators=(',', ':'))
-        sock.send(message.encode(ENCODING))
+        client.sock.send(message.encode(ENCODING))
         print('Установлено соединение с сервером.')
         log.info(
             f'Запущен клиент с парамертами: адрес сервера: {address}, '
@@ -34,12 +35,12 @@ def main():
         log.error(f'Соединение с сервером не установлено. Ошибка {e}')
     else:
         sender = threading.Thread(
-            target=user_input, args=(sock, client_name))
+            target=user_input, args=(client.sock, client_name))
         sender.daemon = True
         sender.start()
 
         receiver = threading.Thread(
-            target=user_output, args=(sock, client_name))
+            target=user_output, args=(client.sock, client_name))
         receiver.daemon = True
         receiver.start()
         log.debug('Запущены процессы')

@@ -8,7 +8,7 @@ import time
 import traceback
 from socket import socket, SOCK_STREAM
 
-from .metaclasses import ServerVerifier
+from .metaclasses import ServerVerifier, ClientVerifier
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
     NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
 
@@ -203,6 +203,15 @@ def write_responses(w_clients, clients_data):
 
 
 # Функции клиента
+class Client(metaclass=ClientVerifier):
+    def __init__(self, sock):
+        self.sock = sock
+        super().__init__()
+
+    def connect(self, arg):
+        self.sock.connect(arg)
+
+
 @Log
 def parse_args():
     parser = argparse.ArgumentParser()
