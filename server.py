@@ -15,11 +15,11 @@ def main():
 
     clients_data = {}
     server_param = get_server_param()
-    server_sock = Server(addr=server_param['addr'], port=server_param['port'])
-    server_sock.start_socket()
+    server = Server(addr=server_param['addr'], port=server_param['port'])
+    server.start_socket()
     while True:
         try:
-            conn, addr = server_sock.accept()
+            conn, addr = server.accept()
             print(f'Соединение установлено: {addr}')
         except OSError:
             pass
