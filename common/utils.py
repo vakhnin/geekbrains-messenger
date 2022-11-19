@@ -54,7 +54,7 @@ class PortDesc:
         return self._port
 
 
-class ServerSocket(metaclass=ServerVerifier):
+class Server(metaclass=ServerVerifier):
     _port = PortDesc()
 
     def __init__(self, addr='', port=7777):
