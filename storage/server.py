@@ -26,3 +26,6 @@ class Storage:
         history = History(user_id, ip, login_time)
         self._session.add(history)
         self._session.commit()
+
+    def history_all_users(self):
+        return self._session.query(History).all()

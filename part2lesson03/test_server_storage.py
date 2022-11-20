@@ -19,3 +19,6 @@ print(storage.user_by_login('Вася1111'))
 # Добавляем время логина
 storage.history_time_add(storage.user_by_login('Вася').id, '127.0.0.1')
 storage.history_time_add(storage.user_by_login('Вася').id, '127.0.0.2')
+
+# Получаем данные о входе пользователей
+print(storage.history_all_users())
