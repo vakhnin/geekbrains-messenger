@@ -1,4 +1,6 @@
+import os
 import subprocess
+import sys
 
 PROCESSES = []
 
@@ -12,7 +14,8 @@ while True:
     elif ACTION == 's':
         PROCESSES.append(
             subprocess.Popen('python server.py',
-                             creationflags=subprocess.CREATE_NEW_CONSOLE)
+                             env=({**os.environ, 'PYTHONPATH': ';'.join(sys.path)}),
+                             creationflags=subprocess.CREATE_NEW_CONSOLE),
         )
 
         for i in range(1, 4):
