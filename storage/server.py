@@ -16,3 +16,6 @@ class Storage:
 
     def user_list(self):
         return self._session.query(User).all()
+
+    def user_by_login(self, login):
+        return self._session.query(User).filter_by(login=login).first()
