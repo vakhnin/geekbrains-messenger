@@ -11,7 +11,7 @@ class Storage:
 
     def user_add(self, login, info=''):
         if self._session.query(User).filter_by(login=login).first():
-            return
+            return None
         user = User(login, info)
         self._session.add(user)
         self._session.commit()
@@ -22,8 +22,12 @@ class Storage:
     def user_by_login(self, login):
         return self._session.query(User).filter_by(login=login).first()
 
-    def history_time_add(self, user_id, ip, login_time=datetime.datetime.now()):
-        history = History(user_id, ip, login_time)
+    def history_time_add(self, user_login, ip, login_time=datetime.datetime.now()):
+        user = self.user_by_login(user_login)
+        if not user:
+            print(f'Ошибка: пользователя с логином {user_login} не существует')
+            return
+        history = History(user.id, ip, login_time)
         self._session.add(history)
         self._session.commit()
 
