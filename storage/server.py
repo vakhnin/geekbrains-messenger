@@ -7,9 +7,12 @@ class Storage:
     def __init__(self, engine):
         self._session = Session(engine)
 
-    def add_user(self, login, info=''):
+    def user_add(self, login, info=''):
         if self._session.query(User).filter_by(login=login).first():
             return
         user = User(login, info)
         self._session.add(user)
         self._session.commit()
+
+    def user_list(self):
+        return self._session.query(User).all()
