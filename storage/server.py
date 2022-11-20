@@ -1,6 +1,8 @@
+import datetime
+
 from sqlalchemy.orm import Session
 
-from storage.models import User
+from storage.models import User, History
 
 
 class Storage:
@@ -19,3 +21,8 @@ class Storage:
 
     def user_by_login(self, login):
         return self._session.query(User).filter_by(login=login).first()
+
+    def history_time_add(self, user_id, ip, login_time=datetime.datetime.now()):
+        history = History(user_id, ip, login_time)
+        self._session.add(history)
+        self._session.commit()

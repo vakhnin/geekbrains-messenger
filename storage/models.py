@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -19,6 +19,23 @@ class User(Base):
 
     def __repr__(self):
         return f'<User({self.id}, {self.login}, {self.info})>'
+
+
+class History(Base):
+    __tablename__ = 'history'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    login_time = Column(DateTime)
+    ip = Column(String)
+
+    def __init__(self, user_id, ip, login_time):
+        super().__init__()
+        self.user_id = user_id
+        self.login_time = login_time
+        self.ip = ip
+
+    def __repr__(self):
+        return f'<User({self.id}, {self.user_id}, {self.ip}, {self.login_time})>'
 
 
 cur_path = os.path.abspath(__file__)
