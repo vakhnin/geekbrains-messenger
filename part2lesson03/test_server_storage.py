@@ -9,6 +9,7 @@ storage = Storage(engine)
 # Добавляем пользователей
 storage.user_add('Вася')
 storage.user_add('Вася')
+storage.user_add('Иван')
 storage.user_add('Петя', 'Инфо')
 
 # Получаем список пользователей
@@ -25,3 +26,12 @@ storage.history_time_add('Петя1111', '127.0.0.2')
 
 # Получаем данные о входе пользователей
 pprint(storage.history_all_users())
+
+# Добавляем контакты
+storage.contact_add('Вася', 'Петя')
+storage.contact_add('Вася', 'Петя')
+storage.contact_add('Вася1111', 'Петя')
+storage.contact_add('Вася', 'Иван')
+
+# Получаем список контактов
+print(storage.contact_list_by_login('Вася'))

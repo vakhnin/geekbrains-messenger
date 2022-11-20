@@ -35,7 +35,22 @@ class History(Base):
         self.ip = ip
 
     def __repr__(self):
-        return f'<User({self.id}, {self.user_id}, {self.ip}, {self.login_time})>'
+        return f'<History({self.id}, {self.user_id}, {self.ip}, {self.login_time})>'
+
+
+class Contact(Base):
+    __tablename__ = 'contacts'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    contact_user_id = Column(Integer, ForeignKey("users.id"))
+
+    def __init__(self, user_id, contact_user_id):
+        super().__init__()
+        self.user_id = user_id
+        self.contact_user_id = contact_user_id
+
+    def __repr__(self):
+        return f'<Contact({self.id}, {self.user_id}, {self.contact_user_id})>'
 
 
 cur_path = os.path.abspath(__file__)
