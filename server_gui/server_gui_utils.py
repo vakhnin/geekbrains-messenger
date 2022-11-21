@@ -8,7 +8,7 @@ cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
 
 
-class ServerGUIindow(QMainWindow):
+class ServerGUIWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         uic.loadUi(cur_dir + 'serverUI.ui', self)
