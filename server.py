@@ -4,7 +4,8 @@ from collections import deque
 import select
 
 import logs.server_log_config
-from common.utils import read_requests, write_responses, get_server_param, ServerSocket
+from common.utils import write_responses, get_server_param, Server
+from storage.models import engine
 
 log = logging.getLogger('messenger.server')
 
@@ -15,11 +16,11 @@ def main():
 
     clients_data = {}
     server_param = get_server_param()
-    server_sock = ServerSocket(addr=server_param['addr'], port=server_param['port'])
-    server_sock.start_socket()
+    server = Server(engine, addr=server_param['addr'], port=server_param['port'])
+    server.start_socket()
     while True:
         try:
-            conn, addr = server_sock.accept()
+            conn, addr = server.accept()
             print(f'Соединение установлено: {addr}')
         except OSError:
             pass
@@ -28,6 +29,7 @@ def main():
             clients_data[conn] = \
                 {
                     'client_name': '',
+                    'client_addr': addr,
                     'msg_for_send': deque(maxlen=100),
                     'answ_for_send': deque(maxlen=100),
                 }
@@ -43,7 +45,7 @@ def main():
             except Exception:
                 pass
 
-            read_requests(r, clients_data)
+            server.read_requests(r, clients_data)
             write_responses(w, clients_data)
 
 

@@ -8,6 +8,7 @@ import time
 import traceback
 from socket import socket, SOCK_STREAM
 
+from storage.server import Storage
 from .metaclasses import ServerVerifier, ClientVerifier
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
     NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
@@ -54,13 +55,14 @@ class PortDesc:
         return self._port
 
 
-class ServerSocket(metaclass=ServerVerifier):
+class Server(metaclass=ServerVerifier):
     _port = PortDesc()
 
-    def __init__(self, addr='', port=7777):
+    def __init__(self, engine, addr='', port=7777):
         self._addr = addr
         self._port = port
         self._sock = None
+        self.storage = Storage(engine)
 
     def start_socket(self):
         self._sock = socket(type=SOCK_STREAM)
@@ -70,6 +72,48 @@ class ServerSocket(metaclass=ServerVerifier):
 
     def accept(self):
         return self._sock.accept()
+
+    def read_requests(self, r_clients, clients_data):
+        for sock in r_clients:
+            if sock not in clients_data.keys():
+                return
+            try:
+                msg = sock.recv(MAX_PACKAGE_LENGTH).decode('utf-8')
+                try:
+                    jim_obj = json.loads(msg)
+                except json.JSONDecodeError:
+                    server_log.error(f'Brocken jim {msg}')
+                    continue
+
+                answer = make_answer(200)
+                answer = json.dumps(answer, separators=(',', ':'))
+                clients_data[sock]['answ_for_send'].append(answer)
+
+                if not isinstance(jim_obj, dict):
+                    server_log.error(f'Data not dict {jim_obj}')
+                    continue
+                if 'action' in jim_obj.keys():
+                    if jim_obj['action'] == 'presence':
+                        if 'user' in jim_obj.keys() \
+                                and isinstance(jim_obj['user'], dict) \
+                                and 'client_name' in jim_obj['user'].keys():
+                            clients_data[sock]['client_name'] = \
+                                jim_obj['user']['client_name']
+                            self.storage.user_add(jim_obj['user']['client_name'])
+                            self.storage.history_time_add(
+                                clients_data[sock]['client_name'],
+                                clients_data[sock]['client_addr'][0]
+                            )
+                            continue
+                    elif jim_obj['action'] == 'msg':
+                        for _, value in clients_data.items():
+                            if jim_obj['to'] == '#' \
+                                    or jim_obj['to'] == value['client_name']:
+                                value['msg_for_send'].append(msg)
+            except Exception:
+                print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
+                sock.close()
+                del clients_data[sock]
 
 
 def get_server_param():
@@ -141,45 +185,6 @@ def parse_presence(jim_obj):
             print(f'Status user{jim_obj["user"]["account_name"]} is "' +
                   jim_obj['user']['status'] + '"')
         return make_answer(200)
-
-
-@Log
-def read_requests(r_clients, clients_data):
-    for sock in r_clients:
-        if sock not in clients_data.keys():
-            return
-        try:
-            msg = sock.recv(MAX_PACKAGE_LENGTH).decode('utf-8')
-            try:
-                jim_obj = json.loads(msg)
-            except json.JSONDecodeError:
-                server_log.error(f'Brocken jim {msg}')
-                continue
-
-            answer = make_answer(200)
-            answer = json.dumps(answer, separators=(',', ':'))
-            clients_data[sock]['answ_for_send'].append(answer)
-
-            if not isinstance(jim_obj, dict):
-                server_log.error(f'Data not dict {jim_obj}')
-                continue
-            if 'action' in jim_obj.keys():
-                if jim_obj['action'] == 'presence':
-                    if 'user' in jim_obj.keys() \
-                            and isinstance(jim_obj['user'], dict) \
-                            and 'client_name' in jim_obj['user'].keys():
-                        clients_data[sock]['client_name'] = \
-                            jim_obj['user']['client_name']
-                        continue
-                elif jim_obj['action'] == 'msg':
-                    for _, value in clients_data.items():
-                        if jim_obj['to'] == '#' \
-                                or jim_obj['to'] == value['client_name']:
-                            value['msg_for_send'].append(msg)
-        except Exception:
-            print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
-            sock.close()
-            del clients_data[sock]
 
 
 @Log
