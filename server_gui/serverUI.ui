@@ -18,6 +18,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTableWidget" name="usersTableWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -25,6 +28,9 @@
       <width>431</width>
       <height>192</height>
      </rect>
+    </property>
+    <property name="sortingEnabled">
+     <bool>true</bool>
     </property>
     <column>
      <property name="text">

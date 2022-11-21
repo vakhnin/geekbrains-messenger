@@ -19,6 +19,10 @@ class ServerGUIWindow(QMainWindow):
 
     def show_users_list(self):
         users_table = self.usersTableWidget
+
+        users_table.clearContents()
+        users_table.setRowCount(0)
+        
         users_list = self.storage.user_list()
 
         users_table.setRowCount(len(users_list))
