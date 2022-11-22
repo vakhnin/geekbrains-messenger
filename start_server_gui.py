@@ -9,5 +9,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = ServerGUIWindow()
     window.show_users_list()
+    window.show_hystory_logins_list()
     window.show()
     sys.exit(app.exec_())

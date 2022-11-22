@@ -22,6 +22,9 @@ class Storage:
     def user_by_login(self, login):
         return self._session.query(User).filter_by(login=login).first()
 
+    def user_by_id(self, id):
+        return self._session.query(User).filter_by(id=id).first()
+
     def history_time_add(self, user_login, ip, login_time=datetime.datetime.now()):
         user = self.user_by_login(user_login)
         if not user:
