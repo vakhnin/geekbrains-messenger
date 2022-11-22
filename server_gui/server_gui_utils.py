@@ -15,7 +15,10 @@ class ServerGUIWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         uic.loadUi(cur_dir + 'serverUI.ui', self)
+
         self.storage = Storage(engine)
+
+        self.refreshUsersListButton.clicked.connect(self.show_users_list)
 
     def show_users_list(self):
         users_table = self.usersTableWidget
