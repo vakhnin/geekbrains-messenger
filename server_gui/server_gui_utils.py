@@ -22,7 +22,7 @@ class ServerGUIWindow(QMainWindow):
 
         users_table.clearContents()
         users_table.setRowCount(0)
-        
+
         users_list = self.storage.user_list()
 
         users_table.setRowCount(len(users_list))
