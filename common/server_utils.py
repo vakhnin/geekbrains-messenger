@@ -92,6 +92,13 @@ class Server(metaclass=ServerVerifier):
                         answer = make_answer(202, {'alert': f'{contact_list}'})
                         answer = json.dumps(answer, separators=(',', ':'))
                         clients_data[sock]['answ_for_send'].append(answer)
+                    elif jim_obj['action'] == 'add_contact':
+                        if self.storage.contact_add(jim_obj['user_login'], jim_obj['user_id']):
+                            answer = make_answer(200)
+                        else:
+                            answer = make_answer(500)
+                        answer = json.dumps(answer, separators=(',', ':'))
+                        clients_data[sock]['answ_for_send'].append(answer)
             except Exception:
                 print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()

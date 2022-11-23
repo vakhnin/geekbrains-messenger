@@ -11,9 +11,6 @@ while True:
                    'gs - запустить виджет сервера: ')
 
     if ACTION == 'q':
-        while PROCESSES:
-            VICTIM = PROCESSES.pop()
-            VICTIM.kill()
         break
     elif ACTION == 'gs':
         PROCESSES.append(

@@ -41,22 +41,23 @@ class Storage:
         user = self.user_by_login(user_login)
         if not user:
             print(f'Ошибка contact_add: пользователя с логином {user_login} не существует')
-            return
+            return False
 
         contact_user = self.user_by_login(contact_user_login)
         if not contact_user:
             print(f'Ошибка contact_add: пользователя с логином {contact_user} не существует')
-            return
+            return False
 
         contact = self._session.query(Contact). \
             filter_by(user_id=user.id). \
             filter_by(contact_user_id=contact_user.id).all()
         if contact:
-            return
+            return False
 
         contact = Contact(user.id, contact_user.id)
         self._session.add(contact)
         self._session.commit()
+        return True
 
     def contact_list_by_login(self, login):
         user = self.user_by_login(login)

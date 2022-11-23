@@ -85,6 +85,15 @@ def make_get_contacts_message(client_name):
     }
 
 
+def make_add_contact_message(client_name, contact_name):
+    return {
+        'action': 'add_contact',
+        'user_id': contact_name,
+        'time': time.time(),
+        'user_login': client_name,
+    }
+
+
 @Log
 def send_message_take_answer(sock, msg):
     msg = json.dumps(msg, separators=(',', ':'))
@@ -103,6 +112,7 @@ def cmd_help():
     print('m [сообщение] - отправить сообщение в общий чат.')
     print('p [получатель] [сообщение] - отправить приватное сообщение.')
     print('c получить список контактов с сервера.')
+    print('a [имя пользователя] добавить пользователя в список контактов.')
     print('help - вывести подсказки по командам')
     print('exit - выход из программы')
 
@@ -122,6 +132,8 @@ def user_input(sock, client_name):
                 continue
             elif msg[0] == 'c' or msg[0] == 'с':
                 msg = make_get_contacts_message(client_name)
+            elif msg[0] == 'a' or msg[0] == 'а':
+                msg = make_add_contact_message(client_name, msg[1])
             elif msg[0] == 'm':
                 if len(msg) < 2:
                     print('Неверное количество аргументов команды.'
