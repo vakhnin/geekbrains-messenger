@@ -62,5 +62,7 @@ class Storage:
         user = self.user_by_login(login)
         if not user:
             print(f'Ошибка contact_add: пользователя с логином {login} не существует')
-            return
-        return self._session.query(Contact).all()
+            return []
+        contacts_list = self._session.query(Contact)\
+            .filter_by(user_id=self.user_by_login(login).id).all()
+        return [self.user_by_id(user.contact_user_id).login for user in contacts_list]

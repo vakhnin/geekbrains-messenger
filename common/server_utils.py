@@ -87,6 +87,11 @@ class Server(metaclass=ServerVerifier):
                             if jim_obj['to'] == '#' \
                                     or jim_obj['to'] == value['client_name']:
                                 value['msg_for_send'].append(msg)
+                    elif jim_obj['action'] == 'get_contacts':
+                        contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
+                        answer = make_answer(202, {'alert': f'{contact_list}'})
+                        answer = json.dumps(answer, separators=(',', ':'))
+                        clients_data[sock]['answ_for_send'].append(answer)
             except Exception:
                 print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()
@@ -176,7 +181,8 @@ def write_responses(w_clients, clients_data):
             elif len(clients_data[sock]['msg_for_send']):
                 msg = clients_data[sock]['msg_for_send'].pop()
                 sock.send(msg.encode('utf-8'))
-        except Exception:
+        except Exception as e:
+            print(e)
             print(
                 f'Клиент {sock.fileno()} {sock.getpeername()} отключился'
             )

@@ -76,6 +76,15 @@ def make_msg_message(client_name, msg, to='#'):
     }
 
 
+def make_get_contacts_message(client_name):
+    return {
+        'action': 'get_contacts',
+        'time': time.time(),
+        'user_login': client_name,
+        'encoding': 'utf-8',
+    }
+
+
 @Log
 def send_message_take_answer(sock, msg):
     msg = json.dumps(msg, separators=(',', ':'))
@@ -93,6 +102,7 @@ def cmd_help():
     print('Поддерживаемые команды:')
     print('m [сообщение] - отправить сообщение в общий чат.')
     print('p [получатель] [сообщение] - отправить приватное сообщение.')
+    print('c получить список контактов с сервера.')
     print('help - вывести подсказки по командам')
     print('exit - выход из программы')
 
@@ -110,6 +120,8 @@ def user_input(sock, client_name):
             elif msg[0] == 'help':
                 cmd_help()
                 continue
+            elif msg[0] == 'c' or msg[0] == 'с':
+                msg = make_get_contacts_message(client_name)
             elif msg[0] == 'm':
                 if len(msg) < 2:
                     print('Неверное количество аргументов команды.'
@@ -150,6 +162,8 @@ def user_output(sock, client_name):
                 continue
             if 'response' in jim_obj.keys():
                 client_log.debug(f'Получен ответ сервера {jim_obj["response"]}')
+                if jim_obj['response'] == 202:
+                    print(f'Список контактов: {jim_obj["alert"]}')
                 continue
             if 'action' in jim_obj.keys():
                 if jim_obj['action'] == 'msg':
