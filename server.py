@@ -5,7 +5,7 @@ import select
 
 import logs.server_log_config
 from common.server_utils import write_responses, get_server_param, Server
-from storage.models import engine
+from storage.server_models import engine
 
 log = logging.getLogger('messenger.server')
 

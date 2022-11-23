@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy.orm import Session
 
-from storage.models import User, History, Contact
+from storage.server_models import User, History, Contact
 
 
 class Storage:

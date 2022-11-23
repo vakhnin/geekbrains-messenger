@@ -3,7 +3,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 
-from storage.models import engine
+from storage.server_models import engine
 from storage.server_storage import Storage
 
 cur_path = os.path.abspath(__file__)
