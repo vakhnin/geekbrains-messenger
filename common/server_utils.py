@@ -4,7 +4,7 @@ import logging
 import sys
 from socket import socket, SOCK_STREAM
 
-from storage.server import Storage
+from storage.server_storage import Storage
 from .metaclasses import ServerVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
