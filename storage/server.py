@@ -59,11 +59,31 @@ class Storage:
         self._session.commit()
         return True
 
+    def contact_del(self, user_login, contact_user_login):
+        user = self.user_by_login(user_login)
+        if not user:
+            print(f'Ошибка contact_add: пользователя с логином {user_login} не существует')
+            return False
+
+        contact_user = self.user_by_login(contact_user_login)
+        if not contact_user:
+            print(f'Ошибка contact_add: пользователя с логином {contact_user} не существует')
+            return False
+
+        contact = self._session.query(Contact). \
+            filter_by(user_id=user.id). \
+            filter_by(contact_user_id=contact_user.id).first()
+        if not contact:
+            return False
+        self._session.delete(contact)
+        self._session.commit()
+        return True
+
     def contact_list_by_login(self, login):
         user = self.user_by_login(login)
         if not user:
             print(f'Ошибка contact_add: пользователя с логином {login} не существует')
             return []
-        contacts_list = self._session.query(Contact)\
+        contacts_list = self._session.query(Contact) \
             .filter_by(user_id=self.user_by_login(login).id).all()
         return [self.user_by_id(user.contact_user_id).login for user in contacts_list]
