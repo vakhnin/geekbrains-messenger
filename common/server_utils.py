@@ -85,7 +85,8 @@ class Server(metaclass=ServerVerifier):
                     elif jim_obj['action'] == 'msg':
                         for _, value in clients_data.items():
                             if jim_obj['to'] == '#' \
-                                    or jim_obj['to'] == value['client_name']:
+                                    or jim_obj['to'] == value['client_name'] \
+                                    or jim_obj['from'] == value['client_name']:
                                 value['msg_for_send'].append(msg)
                     elif jim_obj['action'] == 'get_contacts':
                         contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])

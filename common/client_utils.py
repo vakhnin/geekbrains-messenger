@@ -201,6 +201,9 @@ def user_output(sock, client_name):
                             print(
                                 f'{jim_obj["from"]}> {jim_obj["message"]}'
                             )
+                        elif jim_obj['from'] == client_name:
+                            print(f'{jim_obj["from"]}->'
+                                  f'{jim_obj["to"]} (private)> {jim_obj["message"]}')
                         else:
                             print(
                                 f'{jim_obj["from"]} (private)> '
