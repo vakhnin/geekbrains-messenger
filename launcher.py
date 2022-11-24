@@ -25,7 +25,7 @@ while True:
                              creationflags=subprocess.CREATE_NEW_CONSOLE),
         )
 
-        for i in range(1, 4):
+        for i in range(1, 3):
             PROCESSES.append(
                 subprocess.Popen(f'python client.py -n test{i}',
                                  env=({**os.environ, 'PYTHONPATH': ';'.join(sys.path)}),

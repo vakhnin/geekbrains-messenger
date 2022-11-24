@@ -1,9 +1,11 @@
 import json
 import logging
+import sys
 import threading
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 
+from client_gui.client_gui_utils import start_client_window
 from common.client_utils import make_presence_message, \
     send_message_take_answer, parse_args, user_input, user_output, Client
 import logs.client_log_config
@@ -14,6 +16,11 @@ log = logging.getLogger('messenger.client')
 
 def main():
     address, port, client_name = parse_args()
+
+    client_window = threading.Thread(
+        target=start_client_window, args=(client_name,))
+    client_window.daemon = True
+    client_window.start()
 
     try:
         print('Консольный месседжер. Клиентский модуль.')
@@ -46,7 +53,7 @@ def main():
         log.debug('Запущены процессы')
 
         while True:
-            time.sleep(10)
+            time.sleep(4)
             if sender.is_alive() and receiver.is_alive():
                 continue
             break
