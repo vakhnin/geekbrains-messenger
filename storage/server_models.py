@@ -24,7 +24,7 @@ class User(Base):
 class History(Base):
     __tablename__ = 'history'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey('users.id'))
     login_time = Column(DateTime)
     ip = Column(String)
 
@@ -41,8 +41,8 @@ class History(Base):
 class Contact(Base):
     __tablename__ = 'contacts'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    contact_user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    contact_user_id = Column(Integer, ForeignKey('users.id'))
 
     def __init__(self, user_id, contact_user_id):
         super().__init__()

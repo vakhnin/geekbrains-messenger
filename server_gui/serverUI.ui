@@ -16,22 +16,144 @@
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>Users list</string>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>841</width>
+      <height>581</height>
+     </rect>
     </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string> Users list</string>
+     </attribute>
+     <widget class="QTableWidget" name="usersTableWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>50</y>
+        <width>431</width>
+        <height>501</height>
+       </rect>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>id</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>login</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>info</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="refreshUsersListButton">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>10</y>
+        <width>431</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> Нажмите Refresh для получения списка</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>History logins list</string>
+     </attribute>
+     <widget class="QPushButton" name="refreshHystoryLoginsListButton">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="hystoryLoginsTableWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>50</y>
+        <width>431</width>
+        <height>501</height>
+       </rect>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>user</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>login time</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ip</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>10</y>
+        <width>431</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> Нажмите Refresh для получения списка</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
-   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

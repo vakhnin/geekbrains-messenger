@@ -4,7 +4,7 @@ import threading
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 
-from common.utils import make_presence_message, \
+from common.client_utils import make_presence_message, \
     send_message_take_answer, parse_args, user_input, user_output, Client
 import logs.client_log_config
 from common.vars import ENCODING

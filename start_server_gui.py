@@ -1,7 +1,12 @@
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets
 import sys
 
-app = QtWidgets.QApplication(sys.argv)
-window = uic.loadUi('server_gui\serverUI.ui')
-window.show()
-sys.exit(app.exec_())
+
+from server_gui.server_gui_utils import ServerGUIWindow
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = ServerGUIWindow()
+    window.show()
+    sys.exit(app.exec_())

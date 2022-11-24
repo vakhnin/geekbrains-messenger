@@ -1,8 +1,8 @@
 from pprint import pprint
 
-from storage.server import Storage
+from storage.server_storage import Storage
 
-from storage.models import engine
+from storage.server_models import engine
 
 storage = Storage(engine)
 

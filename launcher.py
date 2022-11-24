@@ -7,10 +7,17 @@ PROCESSES = []
 while True:
     ACTION = input('Выберите действие: q - выход, '
                    's - запустить сервер и клиенты, '
-                   'x - закрыть все окна: ')
+                   'x - закрыть все окна, '
+                   'gs - запустить виджет сервера: ')
 
     if ACTION == 'q':
         break
+    elif ACTION == 'gs':
+        PROCESSES.append(
+            subprocess.Popen('python start_server_gui.py',
+                             env=({**os.environ, 'PYTHONPATH': ';'.join(sys.path)}),
+                             creationflags=subprocess.CREATE_NO_WINDOW),
+        )
     elif ACTION == 's':
         PROCESSES.append(
             subprocess.Popen('python server.py',
