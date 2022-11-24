@@ -1,10 +1,12 @@
 import argparse
+import datetime
 import json
 import logging
 import re
 import sys
 import time
 
+from storage.client_storage import ClientStorage
 from .metaclasses import ClientVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING
@@ -55,7 +57,7 @@ def parse_answer(jim_obj):
 def make_presence_message(client_name, status):
     return {
         'action': 'presence',
-        'time': time.time(),
+        'time': str(datetime.datetime.now()),
         'type': 'status',
         'user': {
             'client_name': client_name,
@@ -68,7 +70,7 @@ def make_presence_message(client_name, status):
 def make_msg_message(client_name, msg, to='#'):
     return {
         'action': 'msg',
-        'time': time.time(),
+        'time': str(datetime.datetime.now()),
         'to': to,
         'from': client_name,
         'encoding': 'utf-8',
@@ -79,7 +81,7 @@ def make_msg_message(client_name, msg, to='#'):
 def make_get_contacts_message(client_name):
     return {
         'action': 'get_contacts',
-        'time': time.time(),
+        'time': str(datetime.datetime.now()),
         'user_login': client_name,
         'encoding': 'utf-8',
     }
@@ -89,7 +91,7 @@ def make_add_contact_message(client_name, contact_name):
     return {
         'action': 'add_contact',
         'user_id': contact_name,
-        'time': time.time(),
+        'time': str(datetime.datetime.now()),
         'user_login': client_name,
     }
 
@@ -98,7 +100,7 @@ def make_del_contact_message(client_name, contact_name):
     return {
         'action': 'del_contact',
         'user_id': contact_name,
-        'time': time.time(),
+        'time': str(datetime.datetime.now()),
         'user_login': client_name,
     }
 
@@ -172,6 +174,7 @@ def user_input(sock, client_name):
 @Log
 def user_output(sock, client_name):
     try:
+        storage = ClientStorage(client_name)
         while True:
             data = sock.recv(MAX_PACKAGE_LENGTH)
             if not data:
@@ -203,5 +206,7 @@ def user_output(sock, client_name):
                                 f'{jim_obj["from"]} (private)> '
                                 f'{jim_obj["message"]}'
                             )
+                    storage.add_message(jim_obj['from'],
+                                        jim_obj['to'], jim_obj['time'], jim_obj['message'])
     except Exception as e:
         client_log.debug(f'Ошибка входного потока{e}')
