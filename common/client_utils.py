@@ -6,6 +6,8 @@ import re
 import sys
 import time
 
+from PyQt5 import QtCore
+
 from storage.client_storage import ClientStorage
 from .metaclasses import ClientVerifier
 from .utils import Log
@@ -171,45 +173,50 @@ def user_input(sock, client_name):
         client_log.debug(f'Ошибка выходного потока {e}')
 
 
-@Log
-def user_output(sock, client_name):
-    try:
-        storage = ClientStorage(client_name)
-        while True:
-            data = sock.recv(MAX_PACKAGE_LENGTH)
-            if not data:
-                break
-            try:
-                jim_obj = json.loads(data.decode(ENCODING))
-            except json.JSONDecodeError:
-                client_log.error(f'Brocken jim {data}')
-                continue
-            if not isinstance(jim_obj, dict):
-                client_log.error(f'Data not dict {jim_obj}')
-                continue
-            if 'response' in jim_obj.keys():
-                client_log.debug(f'Получен ответ сервера {jim_obj["response"]}')
-                if jim_obj['response'] == 202:
-                    print(f'Список контактов: {jim_obj["alert"]}')
-                continue
-            if 'action' in jim_obj.keys():
-                if jim_obj['action'] == 'msg':
-                    if 'from' in jim_obj.keys() \
-                            and 'message' in jim_obj.keys():
-                        if 'to' in jim_obj.keys() \
-                                and jim_obj['to'] == '#':
-                            print(
-                                f'{jim_obj["from"]}> {jim_obj["message"]}'
-                            )
-                        elif jim_obj['from'] == client_name:
-                            print(f'{jim_obj["from"]}->'
-                                  f'{jim_obj["to"]} (private)> {jim_obj["message"]}')
-                        else:
-                            print(
-                                f'{jim_obj["from"]} (private)> '
-                                f'{jim_obj["message"]}'
-                            )
-                    storage.add_message(jim_obj['from'],
-                                        jim_obj['to'], jim_obj['time'], jim_obj['message'])
-    except Exception as e:
-        client_log.debug(f'Ошибка входного потока{e}')
+class Receiver(QtCore.QObject):
+    def __init__(self, sock, client_name):
+        super().__init__()
+        self.sock = sock
+        self.client_name = client_name
+
+    def run(self):
+        try:
+            storage = ClientStorage(self.client_name)
+            while True:
+                data = self.sock.recv(MAX_PACKAGE_LENGTH)
+                if not data:
+                    break
+                try:
+                    jim_obj = json.loads(data.decode(ENCODING))
+                except json.JSONDecodeError:
+                    client_log.error(f'Brocken jim {data}')
+                    continue
+                if not isinstance(jim_obj, dict):
+                    client_log.error(f'Data not dict {jim_obj}')
+                    continue
+                if 'response' in jim_obj.keys():
+                    client_log.debug(f'Получен ответ сервера {jim_obj["response"]}')
+                    if jim_obj['response'] == 202:
+                        print(f'Список контактов: {jim_obj["alert"]}')
+                    continue
+                if 'action' in jim_obj.keys():
+                    if jim_obj['action'] == 'msg':
+                        if 'from' in jim_obj.keys() \
+                                and 'message' in jim_obj.keys():
+                            if 'to' in jim_obj.keys() \
+                                    and jim_obj['to'] == '#':
+                                print(
+                                    f'{jim_obj["from"]}> {jim_obj["message"]}'
+                                )
+                            elif jim_obj['from'] == self.client_name:
+                                print(f'{jim_obj["from"]}->'
+                                      f'{jim_obj["to"]} (private)> {jim_obj["message"]}')
+                            else:
+                                print(
+                                    f'{jim_obj["from"]} (private)> '
+                                    f'{jim_obj["message"]}'
+                                )
+                        storage.add_message(jim_obj['from'],
+                                            jim_obj['to'], jim_obj['time'], jim_obj['message'])
+        except Exception as e:
+            client_log.debug(f'Ошибка входного потока{e}')
