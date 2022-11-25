@@ -19,4 +19,5 @@ def start_client_window(login):
     app = QtWidgets.QApplication(sys.argv)
     window = ClientGUIWindow()
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()
+    return

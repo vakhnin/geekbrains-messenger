@@ -5,7 +5,7 @@ import threading
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication
 
 from client_gui.client_gui_utils import start_client_window
@@ -17,7 +17,12 @@ from common.vars import ENCODING
 log = logging.getLogger('messenger.client')
 
 
-class MainApp(QApplication):
+class MainApp(QtWidgets.QWidget):
+    def __init__(self):
+        super(MainApp, self).__init__()
+        self.receiver_thread = None
+        self.receiver_handler = None
+
     def main_loop(self):
         address, port, client_name = parse_args()
 
@@ -50,21 +55,23 @@ class MainApp(QApplication):
             sender.daemon = True
             sender.start()
 
-            self.thread = QtCore.QThread()
-            self.browserHandler = Receiver(client.sock, client_name)
-            self.browserHandler.moveToThread(self.thread)
-            self.thread.started.connect(self.browserHandler.run)
-            self.thread.start()
+            self.receiver_thread = QtCore.QThread()
+            self.receiver_handler = Receiver(client.sock, client_name)
+            self.receiver_handler.moveToThread(self.receiver_thread)
+            self.receiver_thread.started.connect(self.receiver_handler.run)
+            self.receiver_thread.start()
 
             log.debug('Запущены процессы')
 
             while True:
                 time.sleep(4)
-                if sender.is_alive() and self.thread.isRunning():
+                if sender.is_alive() and self.receiver_thread.isRunning():
                     continue
                 break
 
 
 if __name__ == '__main__':
-    main_app = MainApp([])
+    app = QtWidgets.QApplication(sys.argv)
+    main_app = MainApp()
     main_app.main_loop()
+    sys.exit(app.exec_())
