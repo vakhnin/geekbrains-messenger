@@ -6,6 +6,7 @@ import time
 from socket import socket, AF_INET, SOCK_STREAM
 
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 
 from client_gui.client_gui_utils import start_client_window
@@ -20,8 +21,7 @@ log = logging.getLogger('messenger.client')
 class MainApp(QtWidgets.QWidget):
     def __init__(self):
         super(MainApp, self).__init__()
-        self.receiver_thread = None
-        self.receiver_handler = None
+        self.receiver_thread = QtCore.QThread()
 
     def main_loop(self):
         address, port, client_name = parse_args()
@@ -55,10 +55,7 @@ class MainApp(QtWidgets.QWidget):
             sender.daemon = True
             sender.start()
 
-            self.receiver_thread = QtCore.QThread()
-            self.receiver_handler = Receiver(client.sock, client_name)
-            self.receiver_handler.moveToThread(self.receiver_thread)
-            self.receiver_thread.started.connect(self.receiver_handler.run)
+            self.receiver_thread = Receiver(client.sock, client_name)
             self.receiver_thread.start()
 
             log.debug('Запущены процессы')

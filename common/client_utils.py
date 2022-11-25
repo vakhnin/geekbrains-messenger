@@ -7,6 +7,7 @@ import sys
 import time
 
 from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
 
 from storage.client_storage import ClientStorage
 from .metaclasses import ClientVerifier
@@ -173,9 +174,9 @@ def user_input(sock, client_name):
         client_log.debug(f'Ошибка выходного потока {e}')
 
 
-class Receiver(QtCore.QObject):
-    def __init__(self, sock, client_name):
-        super().__init__()
+class Receiver(QtCore.QThread):
+    def __init__(self, sock, client_name, parent=None):
+        QtCore.QThread.__init__(self, parent)
         self.sock = sock
         self.client_name = client_name
 
