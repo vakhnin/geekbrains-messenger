@@ -28,5 +28,3 @@ class Message(Base):
 cur_path = os.path.abspath(__file__)
 cur_dir, _ = os.path.split(cur_path)
 client_db_dir = cur_dir + os.sep
-engine = create_engine(f'sqlite:///{cur_dir}server_db.sqlite')
-Base.metadata.create_all(engine)
