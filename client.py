@@ -28,9 +28,14 @@ class MainApp(QtWidgets.QWidget):
         self.sender_thread.start()
         self.receiver_thread = Receiver(self.sock, client_name)
         self.receiver_thread.start()
+        self.receiver_thread.new_message_signal.connect(self.new_messages_received)
 
         self.main_window = ClientGUIWindow()
         self.main_window.show()
+
+    def new_messages_received(self, s):
+        self.main_window.new_message_signal.emit(s)
+        print(f'main {s}')
 
     def make_socket_send_presens_message(self, address, port, client_name):
         try:
