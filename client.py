@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 
-from client_gui.client_gui_utils import start_client_window
+from client_gui.client_gui_utils import start_client_window, ClientGUIWindow
 from common.client_utils import make_presence_message, \
     send_message_take_answer, parse_args, Client, Receiver, Sender
 import logs.client_log_config
@@ -28,6 +28,9 @@ class MainApp(QtWidgets.QWidget):
         self.sender_thread.start()
         self.receiver_thread = Receiver(self.sock, client_name)
         self.receiver_thread.start()
+
+        self.main_window = ClientGUIWindow()
+        self.main_window.show()
 
     def make_socket_send_presens_message(self, address, port, client_name):
         try:
