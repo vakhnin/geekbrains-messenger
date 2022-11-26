@@ -132,46 +132,51 @@ def cmd_help():
     print('exit - выход из программы')
 
 
-@Log
-def user_input(sock, client_name):
-    try:
-        cmd_help()
-        while True:
-            msg = input('Введите команду: \n')
-            msg = msg.strip()
-            msg = re.split('\\s+', msg)
-            if msg[0] == 'exit':
-                break
-            elif msg[0] == 'help':
-                cmd_help()
-                continue
-            elif msg[0] == 'c' or msg[0] == 'с':
-                msg = make_get_contacts_message(client_name)
-            elif msg[0] == 'a' or msg[0] == 'а':
-                msg = make_add_contact_message(client_name, msg[1])
-            elif msg[0] == 'd':
-                msg = make_del_contact_message(client_name, msg[1])
-            elif msg[0] == 'm':
-                if len(msg) < 2:
-                    print('Неверное количество аргументов команды.'
-                          'Введите "help" для вывода списка команд')
-                    continue
-                msg = make_msg_message(client_name, ' '.join(msg[1:]))
-            elif msg[0] == 'p':
-                if len(msg) < 3:
-                    print('Неверное количество аргументов команды.'
-                          'Введите "help" для вывода списка команд')
-                    continue
-                msg = make_msg_message(client_name, ' '.join(msg[2:]), msg[1])
-            else:
-                print('Команда не распознана. '
-                      'Введите "help" для вывода списка команд')
-                continue
+class Sender(QtCore.QThread):
+    def __init__(self, sock, client_name, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.sock = sock
+        self.client_name = client_name
 
-            msg = json.dumps(msg, separators=(',', ':'))
-            sock.send(msg.encode(ENCODING))
-    except Exception as e:
-        client_log.debug(f'Ошибка выходного потока {e}')
+    def run(self):
+        try:
+            cmd_help()
+            while True:
+                msg = input('Введите команду: \n')
+                msg = msg.strip()
+                msg = re.split('\\s+', msg)
+                if msg[0] == 'exit':
+                    sys.exit()
+                elif msg[0] == 'help':
+                    cmd_help()
+                    continue
+                elif msg[0] == 'c' or msg[0] == 'с':
+                    msg = make_get_contacts_message(self.client_name)
+                elif msg[0] == 'a' or msg[0] == 'а':
+                    msg = make_add_contact_message(self.client_name, msg[1])
+                elif msg[0] == 'd':
+                    msg = make_del_contact_message(self.client_name, msg[1])
+                elif msg[0] == 'm':
+                    if len(msg) < 2:
+                        print('Неверное количество аргументов команды.'
+                              'Введите "help" для вывода списка команд')
+                        continue
+                    msg = make_msg_message(self.client_name, ' '.join(msg[1:]))
+                elif msg[0] == 'p':
+                    if len(msg) < 3:
+                        print('Неверное количество аргументов команды.'
+                              'Введите "help" для вывода списка команд')
+                        continue
+                    msg = make_msg_message(self.client_name, ' '.join(msg[2:]), msg[1])
+                else:
+                    print('Команда не распознана. '
+                          'Введите "help" для вывода списка команд')
+                    continue
+
+                msg = json.dumps(msg, separators=(',', ':'))
+                self.sock.send(msg.encode(ENCODING))
+        except Exception as e:
+            client_log.debug(f'Ошибка выходного потока {e}')
 
 
 class Receiver(QtCore.QThread):

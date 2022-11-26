@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QApplication
 
 from client_gui.client_gui_utils import start_client_window
 from common.client_utils import make_presence_message, \
-    send_message_take_answer, parse_args, user_input, Client, Receiver
+    send_message_take_answer, parse_args, Client, Receiver, Sender
 import logs.client_log_config
 from common.vars import ENCODING
 
@@ -21,7 +21,11 @@ log = logging.getLogger('messenger.client')
 class MainApp(QtWidgets.QWidget):
     def __init__(self):
         super(MainApp, self).__init__()
+        self.sender_thread = QtCore.QThread()
         self.receiver_thread = QtCore.QThread()
+
+    def on_finished(self):
+        print('stop')
 
     def main_loop(self):
         address, port, client_name = parse_args()
@@ -50,21 +54,12 @@ class MainApp(QtWidgets.QWidget):
             print('Соединение с сервером не установлено.')
             log.error(f'Соединение с сервером не установлено. Ошибка {e}')
         else:
-            sender = threading.Thread(
-                target=user_input, args=(client.sock, client_name))
-            sender.daemon = True
-            sender.start()
+            self.sender_thread = Sender(client.sock, client_name)
+            self.sender_thread.start()
 
             self.receiver_thread = Receiver(client.sock, client_name)
             self.receiver_thread.start()
-
             log.debug('Запущены процессы')
-
-            while True:
-                time.sleep(4)
-                if sender.is_alive() and self.receiver_thread.isRunning():
-                    continue
-                break
 
 
 if __name__ == '__main__':
