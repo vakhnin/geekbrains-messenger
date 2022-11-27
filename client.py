@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QApplication
 
 from client_gui.client_gui_utils import start_client_window, ClientGUIWindow
 from common.client_utils import make_presence_message, \
-    send_message_take_answer, parse_args, Client, Receiver, Sender
+    send_message_take_answer, parse_args, Client, Receiver, Sender, make_msg_message
 import logs.client_log_config
 from common.vars import ENCODING
 
@@ -32,6 +32,12 @@ class MainApp(QtWidgets.QWidget):
 
         self.main_window = ClientGUIWindow(client_name)
         self.main_window.show()
+        self.main_window.send_message_signal.connect(self.send_message)
+
+    def send_message(self, obj):
+        msg = make_msg_message(self.client_name, obj['msg'], obj['to'])
+        msg = json.dumps(msg, separators=(',', ':'))
+        self.sock.send(msg.encode(ENCODING))
 
     def new_messages_received(self, jim_obj):
         self.main_window.new_message_signal.emit(jim_obj)
