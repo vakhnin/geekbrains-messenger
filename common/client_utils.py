@@ -132,6 +132,18 @@ def cmd_help():
     print('exit - выход из программы')
 
 
+def message_to_str(jim_obj, client_name):
+    if 'from' in jim_obj.keys() \
+            and 'message' in jim_obj.keys():
+        if 'to' in jim_obj.keys() \
+                and jim_obj['to'] == '#':
+            return f'{jim_obj["from"]}> {jim_obj["message"]}'
+        elif jim_obj['from'] == client_name:
+            return f'{jim_obj["from"]}->{jim_obj["to"]} (private)> {jim_obj["message"]}'
+        else:
+            return f'{jim_obj["from"]} (private)> {jim_obj["message"]}'
+
+
 class Sender(QtCore.QThread):
     def __init__(self, sock, client_name, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -209,21 +221,7 @@ class Receiver(QtCore.QThread):
                     continue
                 if 'action' in jim_obj.keys():
                     if jim_obj['action'] == 'msg':
-                        if 'from' in jim_obj.keys() \
-                                and 'message' in jim_obj.keys():
-                            if 'to' in jim_obj.keys() \
-                                    and jim_obj['to'] == '#':
-                                print(
-                                    f'{jim_obj["from"]}> {jim_obj["message"]}'
-                                )
-                            elif jim_obj['from'] == self.client_name:
-                                print(f'{jim_obj["from"]}->'
-                                      f'{jim_obj["to"]} (private)> {jim_obj["message"]}')
-                            else:
-                                print(
-                                    f'{jim_obj["from"]} (private)> '
-                                    f'{jim_obj["message"]}'
-                                )
+                        print(message_to_str(jim_obj, self.client_name))
                         self.new_message_signal.emit(jim_obj)
                         storage.add_message(jim_obj['from'],
                                             jim_obj['to'], jim_obj['time'], jim_obj['message'])

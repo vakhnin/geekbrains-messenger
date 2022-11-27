@@ -4,6 +4,8 @@ import sys
 from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtWidgets import QMainWindow
 
+from common.client_utils import message_to_str
+
 cur_path = os.path.abspath(__file__)
 cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
@@ -23,8 +25,8 @@ class ClientGUIWindow(QMainWindow):
 
         self.new_message_signal.connect(self.new_messages_received)
 
-    def new_messages_received(self, s):
-        print(f'window {s}')
+    def new_messages_received(self, jim_obj):
+        self.commonChatListWidget.addItem(message_to_str(jim_obj, self.client_name))
 
 
 def start_client_window(login):
