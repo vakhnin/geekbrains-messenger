@@ -22,7 +22,6 @@ class ClientGUIWindow(QMainWindow):
 
         label_text = f'Привет {client_name}!'
         self.clientNameLabel.setText(label_text)
-        self.clientNameLabel_2.setText(label_text)
 
         self.new_message_signal.connect(self.new_messages_received)
 
