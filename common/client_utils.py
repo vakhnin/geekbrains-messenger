@@ -180,7 +180,7 @@ class Sender(QtCore.QThread):
 
 
 class Receiver(QtCore.QThread):
-    new_message_signal = QtCore.pyqtSignal(str)
+    new_message_signal = QtCore.pyqtSignal(object)
 
     def __init__(self, sock, client_name, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -224,7 +224,7 @@ class Receiver(QtCore.QThread):
                                     f'{jim_obj["from"]} (private)> '
                                     f'{jim_obj["message"]}'
                                 )
-                        self.new_message_signal.emit(jim_obj['message'])
+                        self.new_message_signal.emit(jim_obj)
                         storage.add_message(jim_obj['from'],
                                             jim_obj['to'], jim_obj['time'], jim_obj['message'])
         except Exception as e:

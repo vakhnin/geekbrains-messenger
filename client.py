@@ -30,7 +30,7 @@ class MainApp(QtWidgets.QWidget):
         self.receiver_thread.start()
         self.receiver_thread.new_message_signal.connect(self.new_messages_received)
 
-        self.main_window = ClientGUIWindow()
+        self.main_window = ClientGUIWindow(client_name)
         self.main_window.show()
 
     def new_messages_received(self, s):
