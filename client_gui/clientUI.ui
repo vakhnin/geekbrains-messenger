@@ -107,7 +107,7 @@
        <string>Список контактов</string>
       </property>
      </widget>
-     <widget class="QListWidget" name="listWidget">
+     <widget class="QListWidget" name="contactListWidget">
       <property name="geometry">
        <rect>
         <x>20</x>

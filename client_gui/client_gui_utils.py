@@ -2,6 +2,7 @@ import os
 import sys
 
 from PyQt5 import uic, QtWidgets, QtCore
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
 from common.client_utils import message_to_str
@@ -14,6 +15,12 @@ cur_dir += os.sep
 class ClientGUIWindow(QMainWindow):
     new_message_signal = QtCore.pyqtSignal(object)
     send_message_signal = QtCore.pyqtSignal(object)
+    contact_list_signal = QtCore.pyqtSignal(object)
+    new_contact_list_signal = QtCore.pyqtSignal(object)
+
+    timer = QTimer()
+    timer_count = 10
+    contact_list = None
 
     def __init__(self, client_name, parent=None):
         QMainWindow.__init__(self, parent)
@@ -24,8 +31,36 @@ class ClientGUIWindow(QMainWindow):
         self.clientNameLabel.setText(label_text)
 
         self.new_message_signal.connect(self.new_messages_received)
+        self.new_contact_list_signal.connect(self.new_contact_list)
 
         self.commonMessageSendButton.clicked.connect(self.send_message)
+
+        self.contactListWidget.addItem('Старт загрузки списка контактов')
+        self.timer.timeout.connect(self.try_receive_contact_list)
+        self.timer.start(1000)
+
+    def new_contact_list(self, contact_list):
+        self.contact_list = contact_list
+        self.contactListWidget.clear()
+        for contact in contact_list:
+            self.contactListWidget.addItem(contact)
+
+    def try_receive_contact_list(self):
+        if self.contact_list is not None:
+            self.timer.stop()
+        elif self.timer_count <= 0:
+            self.timer.stop()
+            self.contactListWidget \
+                .item(0).setText('Не удалось получить список контактов')
+        else:
+            self.contactListWidget \
+                .item(0).setText(f'Пытаемся загрузить спиок контактов ({self.timer_count}) ...')
+            self.timer_count -= 1
+            self.send_contact_list_command()
+
+    def send_contact_list_command(self, checked=True, command='c'):
+        self.contact_list_signal.emit(
+            {'command': command, 'contact_name': self.contactLineEdit.text()})
 
     def new_messages_received(self, jim_obj):
         self.commonChatListWidget.addItem(message_to_str(jim_obj, self.client_name))

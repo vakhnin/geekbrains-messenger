@@ -193,6 +193,7 @@ class Sender(QtCore.QThread):
 
 class Receiver(QtCore.QThread):
     new_message_signal = QtCore.pyqtSignal(object)
+    new_contact_list_signal = QtCore.pyqtSignal(object)
 
     def __init__(self, sock, client_name, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -217,6 +218,10 @@ class Receiver(QtCore.QThread):
                 if 'response' in jim_obj.keys():
                     client_log.debug(f'Получен ответ сервера {jim_obj["response"]}')
                     if jim_obj['response'] == 202:
+                        contact_list = jim_obj["alert"]
+                        contact_list = contact_list.replace("'", '"')
+                        contact_list = json.loads(contact_list)
+                        self.new_contact_list_signal.emit(contact_list)
                         print(f'Список контактов: {jim_obj["alert"]}')
                     continue
                 if 'action' in jim_obj.keys():
