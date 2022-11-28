@@ -52,6 +52,9 @@
         <height>441</height>
        </rect>
       </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLabel" name="label">
       <property name="geometry">
@@ -136,7 +139,7 @@
        <bool>false</bool>
       </property>
       <property name="wordWrap">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <item>
        <property name="text">
@@ -145,7 +148,7 @@
       </item>
       <item>
        <property name="text">
-        <string>Для открытия приватного чата сделайте двойной клик по имени контакта в списке контактов справа</string>
+        <string>Для открытия приватного чата сделайте двойной клик по имени контакта в списке контактов слева</string>
        </property>
       </item>
      </widget>

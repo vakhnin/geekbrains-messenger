@@ -25,6 +25,7 @@ class ClientGUIWindow(QMainWindow):
     def __init__(self, client_name, parent=None):
         QMainWindow.__init__(self, parent)
         self.client_name = client_name
+        self.current_private_contact = None
         uic.loadUi(cur_dir + 'clientUI.ui', self)
 
         label_text = f'Привет {client_name}!'
@@ -34,6 +35,8 @@ class ClientGUIWindow(QMainWindow):
         self.new_contact_list_signal.connect(self.new_contact_list)
 
         self.commonMessageSendButton.clicked.connect(self.send_message)
+        self.privateMessageSendButton.clicked \
+            .connect(lambda: self.send_message(to=self.current_private_contact))
         self.addContactButton.clicked \
             .connect(lambda: self.send_contact_list_command(command='a'))
         self.delContactButton.clicked \
@@ -42,6 +45,13 @@ class ClientGUIWindow(QMainWindow):
         self.contactListWidget.addItem('Старт загрузки списка контактов')
         self.timer.timeout.connect(self.try_receive_contact_list)
         self.timer.start(1000)
+        self.contactListWidget.itemDoubleClicked.connect(self.set_current_private_contact)
+
+    def set_current_private_contact(self, item):
+        self.current_private_contact = item.text()
+        self.headerPrivateChatLabel.setText(f'Приватный чат c '
+                                            f'{self.current_private_contact}')
+        self.privateChatListWidget.clear()
 
     def new_contact_list(self, contact_list):
         self.contact_list = contact_list
@@ -72,11 +82,20 @@ class ClientGUIWindow(QMainWindow):
     def new_messages_received(self, jim_obj):
         self.commonChatListWidget.addItem(message_to_str(jim_obj, self.client_name))
 
-    def send_message(self, checked, to='#'):
+    def send_message(self, checked=True, to='#'):
+        if to == '#':
+            self.send_message_signal.emit(
+                {'to': to, 'msg': self.commonMessageLineEdit.text()})
+            self.commonMessageLineEdit.setText('')
+            return
+        if self.current_private_contact is None:
+            self.privateChatListWidget \
+                .addItem('Для открытия приватного чата сделайте двойной клик '
+                         'по имени контакта в списке контактов слева')
+            return
         self.send_message_signal.emit(
-            {'to': to, 'msg': self.commonMessageLineEdit.text()})
-        self.commonMessageLineEdit.setText('')
-
+            {'to': to, 'msg': self.privateMessageLineEdit.text()})
+        self.privateMessageLineEdit.setText('')
 
 def start_client_window(login):
     app = QtWidgets.QApplication(sys.argv)
