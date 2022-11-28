@@ -22,7 +22,7 @@ class ClientGUIWindow(QMainWindow):
     timer_count = 10
     contact_list = None
 
-    def __init__(self, client_name, parent=None):
+    def __init__(self, client_name, storage, parent=None):
         QMainWindow.__init__(self, parent)
         self.client_name = client_name
         self.current_private_contact = None
@@ -30,6 +30,7 @@ class ClientGUIWindow(QMainWindow):
 
         label_text = f'Привет {client_name}!'
         self.clientNameLabel.setText(label_text)
+        self.storage = storage
 
         self.new_message_signal.connect(self.new_messages_received)
         self.new_contact_list_signal.connect(self.new_contact_list)
@@ -96,6 +97,7 @@ class ClientGUIWindow(QMainWindow):
         self.send_message_signal.emit(
             {'to': to, 'msg': self.privateMessageLineEdit.text()})
         self.privateMessageLineEdit.setText('')
+
 
 def start_client_window(login):
     app = QtWidgets.QApplication(sys.argv)

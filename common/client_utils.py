@@ -195,14 +195,14 @@ class Receiver(QtCore.QThread):
     new_message_signal = QtCore.pyqtSignal(object)
     new_contact_list_signal = QtCore.pyqtSignal(object)
 
-    def __init__(self, sock, client_name, parent=None):
+    def __init__(self, sock, storage, client_name, parent=None):
         QtCore.QThread.__init__(self, parent)
         self.sock = sock
+        self.storage = storage
         self.client_name = client_name
 
     def run(self):
         try:
-            storage = ClientStorage(self.client_name)
             while True:
                 data = self.sock.recv(MAX_PACKAGE_LENGTH)
                 if not data:
@@ -228,7 +228,7 @@ class Receiver(QtCore.QThread):
                     if jim_obj['action'] == 'msg':
                         print(message_to_str(jim_obj, self.client_name))
                         self.new_message_signal.emit(jim_obj)
-                        storage.add_message(jim_obj['from'],
-                                            jim_obj['to'], jim_obj['time'], jim_obj['message'])
+                        self.storage.add_message(jim_obj['from'],
+                                                 jim_obj['to'], jim_obj['time'], jim_obj['message'])
         except Exception as e:
             client_log.debug(f'Ошибка входного потока{e}')
