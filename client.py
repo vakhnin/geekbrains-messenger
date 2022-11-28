@@ -15,7 +15,6 @@ from common.client_utils import make_presence_message, \
     make_add_contact_message, make_del_contact_message
 import logs.client_log_config
 from common.vars import ENCODING
-from storage.client_storage import ClientStorage
 
 log = logging.getLogger('messenger.client')
 
@@ -25,16 +24,15 @@ class MainApp(QtWidgets.QWidget):
         super(MainApp, self).__init__()
         self.client_name = client_name
         self.sock = self.make_socket_send_presens_message(address, port, client_name)
-        self.storage = ClientStorage(self.client_name)
 
         self.sender_thread = Sender(self.sock, client_name)
         self.sender_thread.start()
-        self.receiver_thread = Receiver(self.sock, self.storage, client_name)
+        self.receiver_thread = Receiver(self.sock, client_name)
         self.receiver_thread.start()
         self.receiver_thread.new_message_signal.connect(self.new_messages_received)
         self.receiver_thread.new_contact_list_signal.connect(self.new_contact_list_received)
 
-        self.main_window = ClientGUIWindow(client_name, self.storage)
+        self.main_window = ClientGUIWindow(client_name)
         self.main_window.show()
         self.main_window.send_message_signal.connect(self.send_message)
         self.main_window.contact_list_signal.connect(self.contact_list_command)
