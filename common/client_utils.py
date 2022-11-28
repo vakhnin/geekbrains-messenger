@@ -227,8 +227,8 @@ class Receiver(QtCore.QThread):
                 if 'action' in jim_obj.keys():
                     if jim_obj['action'] == 'msg':
                         print(message_to_str(jim_obj, self.client_name))
-                        self.new_message_signal.emit(jim_obj)
                         storage.add_message(jim_obj['from'],
                                             jim_obj['to'], jim_obj['time'], jim_obj['message'])
+                        self.new_message_signal.emit(jim_obj)
         except Exception as e:
             client_log.debug(f'Ошибка входного потока{e}')

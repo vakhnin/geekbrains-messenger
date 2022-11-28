@@ -6,6 +6,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
 from common.client_utils import message_to_str
+from storage.client_storage import ClientStorage
 
 cur_path = os.path.abspath(__file__)
 cur_dir, _ = os.path.split(cur_path)
@@ -30,6 +31,7 @@ class ClientGUIWindow(QMainWindow):
 
         label_text = f'Привет {client_name}!'
         self.clientNameLabel.setText(label_text)
+        self.storage = ClientStorage(self.client_name)
 
         self.new_message_signal.connect(self.new_messages_received)
         self.new_contact_list_signal.connect(self.new_contact_list)
@@ -47,11 +49,20 @@ class ClientGUIWindow(QMainWindow):
         self.timer.start(1000)
         self.contactListWidget.itemDoubleClicked.connect(self.set_current_private_contact)
 
+    def refresh_private_list(self):
+        if self.current_private_contact is None:
+            return
+        self.privateChatListWidget.clear()
+        messages = self.storage \
+            .get_private_messages_by_contact_name(self.current_private_contact)
+        for mess in messages[::-1]:
+            self.privateChatListWidget.addItem(f'{mess.user_from}>{mess.msg}')
+
     def set_current_private_contact(self, item):
         self.current_private_contact = item.text()
         self.headerPrivateChatLabel.setText(f'Приватный чат c '
                                             f'{self.current_private_contact}')
-        self.privateChatListWidget.clear()
+        self.refresh_private_list()
 
     def new_contact_list(self, contact_list):
         self.contact_list = contact_list
@@ -81,6 +92,7 @@ class ClientGUIWindow(QMainWindow):
 
     def new_messages_received(self, jim_obj):
         self.commonChatListWidget.addItem(message_to_str(jim_obj, self.client_name))
+        self.refresh_private_list()
 
     def send_message(self, checked=True, to='#'):
         if to == '#':
@@ -96,6 +108,7 @@ class ClientGUIWindow(QMainWindow):
         self.send_message_signal.emit(
             {'to': to, 'msg': self.privateMessageLineEdit.text()})
         self.privateMessageLineEdit.setText('')
+
 
 def start_client_window(login):
     app = QtWidgets.QApplication(sys.argv)
