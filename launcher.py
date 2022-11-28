@@ -27,9 +27,9 @@ while True:
 
         for i in range(1, 4):
             PROCESSES.append(
-                subprocess.Popen(f'python client.py -n test{i}',
+                subprocess.Popen(f'python client.py -n test{len(PROCESSES)}',
                                  env=({**os.environ, 'PYTHONPATH': ';'.join(sys.path)}),
-                                 creationflags=subprocess.CREATE_NEW_CONSOLE)
+                                 creationflags=subprocess.CREATE_NO_WINDOW)
             )
     elif ACTION == 'x':
         while PROCESSES:
