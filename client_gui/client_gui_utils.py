@@ -36,6 +36,8 @@ class ClientGUIWindow(QMainWindow):
         self.commonMessageSendButton.clicked.connect(self.send_message)
         self.addContactButton.clicked \
             .connect(lambda: self.send_contact_list_command(command='a'))
+        self.delContactButton.clicked \
+            .connect(lambda: self.send_contact_list_command(command='d'))
 
         self.contactListWidget.addItem('Старт загрузки списка контактов')
         self.timer.timeout.connect(self.try_receive_contact_list)

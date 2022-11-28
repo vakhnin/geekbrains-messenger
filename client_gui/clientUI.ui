@@ -140,7 +140,7 @@
       </property>
       <item>
        <property name="text">
-        <string>Для добавления контакта введите справа имя контакта и нажмите кнопку &quot;Добавить&quot;</string>
+        <string>Для добавления контакта введите слева имя контакта и нажмите кнопку &quot;Добавить&quot;</string>
        </property>
       </item>
       <item>

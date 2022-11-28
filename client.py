@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QApplication
 from client_gui.client_gui_utils import start_client_window, ClientGUIWindow
 from common.client_utils import make_presence_message, \
     send_message_take_answer, parse_args, Client, Receiver, Sender, make_msg_message, make_get_contacts_message, \
-    make_add_contact_message
+    make_add_contact_message, make_del_contact_message
 import logs.client_log_config
 from common.vars import ENCODING
 
@@ -46,6 +46,8 @@ class MainApp(QtWidgets.QWidget):
             msg = make_get_contacts_message(self.client_name)
         elif obj['command'] == 'a':
             msg = make_add_contact_message(self.client_name, obj['contact_name'])
+        elif obj['command'] == 'd':
+            msg = make_del_contact_message(self.client_name, obj['contact_name'])
         msg = json.dumps(msg, separators=(',', ':'))
         self.sock.send(msg.encode(ENCODING))
 
