@@ -95,14 +95,16 @@ class Server(metaclass=ServerVerifier):
                         clients_data[sock]['answ_for_send'].append(answer)
                     elif jim_obj['action'] == 'add_contact':
                         if self.storage.contact_add(jim_obj['user_login'], jim_obj['user_id']):
-                            answer = make_answer(200)
+                            contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
+                            answer = make_answer(202, {'alert': f'{contact_list}'})
                         else:
                             answer = make_answer(500)
                         answer = json.dumps(answer, separators=(',', ':'))
                         clients_data[sock]['answ_for_send'].append(answer)
                     elif jim_obj['action'] == 'del_contact':
                         if self.storage.contact_del(jim_obj['user_login'], jim_obj['user_id']):
-                            answer = make_answer(200)
+                            contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
+                            answer = make_answer(202, {'alert': f'{contact_list}'})
                         else:
                             answer = make_answer(500)
                         answer = json.dumps(answer, separators=(',', ':'))

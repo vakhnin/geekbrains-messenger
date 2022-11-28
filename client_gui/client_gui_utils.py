@@ -34,6 +34,8 @@ class ClientGUIWindow(QMainWindow):
         self.new_contact_list_signal.connect(self.new_contact_list)
 
         self.commonMessageSendButton.clicked.connect(self.send_message)
+        self.addContactButton.clicked \
+            .connect(lambda: self.send_contact_list_command(command='a'))
 
         self.contactListWidget.addItem('Старт загрузки списка контактов')
         self.timer.timeout.connect(self.try_receive_contact_list)
@@ -42,8 +44,11 @@ class ClientGUIWindow(QMainWindow):
     def new_contact_list(self, contact_list):
         self.contact_list = contact_list
         self.contactListWidget.clear()
-        for contact in contact_list:
-            self.contactListWidget.addItem(contact)
+        if len(contact_list):
+            for contact in contact_list:
+                self.contactListWidget.addItem(contact)
+        else:
+            self.contactListWidget.addItem('Список контактов пуст')
 
     def try_receive_contact_list(self):
         if self.contact_list is not None:
