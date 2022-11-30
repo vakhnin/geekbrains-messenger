@@ -13,6 +13,13 @@ cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
 
 
+class LoginClientGUIWidget(QtWidgets.QWidget):
+    def __init__(self, client_name, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.client_name = client_name
+        uic.loadUi(cur_dir + 'client_loginUI.ui', self)
+
+
 class ClientGUIWindow(QMainWindow):
     new_message_signal = QtCore.pyqtSignal(object)
     send_message_signal = QtCore.pyqtSignal(object)

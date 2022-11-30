@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 
-from client_gui.client_gui_utils import start_client_window, ClientGUIWindow
+from client_gui.client_gui_utils import start_client_window, ClientGUIWindow, LoginClientGUIWidget
 from common.client_utils import make_presence_message, \
     send_message_take_answer, parse_args, Client, Receiver, Sender, make_msg_message, make_get_contacts_message, \
     make_add_contact_message, make_del_contact_message
@@ -20,10 +20,14 @@ log = logging.getLogger('messenger.client')
 
 
 class MainApp(QtWidgets.QWidget):
-    def __init__(self, address, port, client_name):
+    def __init__(self, app, address, port, client_name):
         super(MainApp, self).__init__()
         self.client_name = client_name
-        self.sock = self.make_socket_send_presens_message(address, port, client_name)
+        self.sock = self.make_socket(address, port)
+
+        login_widget = LoginClientGUIWidget(client_name)
+        login_widget.show()
+        app.exec_()
 
         self.sender_thread = Sender(self.sock, client_name)
         self.sender_thread.start()
@@ -59,18 +63,18 @@ class MainApp(QtWidgets.QWidget):
     def new_messages_received(self, jim_obj):
         self.main_window.new_message_signal.emit(jim_obj)
 
-    def make_socket_send_presens_message(self, address, port, client_name):
+    def make_socket(self, address, port):
         try:
             print('Консольный месседжер. Клиентский модуль.')
             sock = socket(AF_INET, SOCK_STREAM)
             client = Client(sock)
             client.connect((address, port))
-            message = make_presence_message(client_name, 'I am here!')
-            answer = send_message_take_answer(client.sock, message)
-            message = json.dumps(message, separators=(',', ':'))
-            client.sock.send(message.encode(ENCODING))
+            # message = make_presence_message(client_name, 'I am here!')
+            # answer = send_message_take_answer(client.sock, message)
+            # message = json.dumps(message, separators=(',', ':'))
+            # client.sock.send(message.encode(ENCODING))
             print('Установлено соединение с сервером.')
-            print(f'\nПривет {client_name}!\n')
+            # print(f'\nПривет {client_name}!\n')
             return sock
         except Exception as e:
             print('Соединение с сервером не установлено.')
@@ -81,5 +85,5 @@ class MainApp(QtWidgets.QWidget):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     address, port, client_name = parse_args()
-    main_app = MainApp(address, port, client_name)
+    main_app = MainApp(app, address, port, client_name)
     sys.exit(app.exec_())
