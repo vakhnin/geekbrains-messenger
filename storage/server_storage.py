@@ -1,18 +1,24 @@
 import datetime
+import hashlib
 
 from sqlalchemy.orm import Session
 
 from storage.server_models import User, History, Contact
 
 
+def password_to_md5(password):
+    salt = '%@V7@A9Cpg'
+    return hashlib.md5((password + salt).encode('utf-8')).hexdigest()
+
+
 class Storage:
     def __init__(self, engine):
         self._session = Session(engine)
 
-    def user_add(self, login, info=''):
+    def user_add(self, login, password, info=''):
         if self._session.query(User).filter_by(login=login).first():
             return None
-        user = User(login, info)
+        user = User(login, password, info)
         self._session.add(user)
         self._session.commit()
 

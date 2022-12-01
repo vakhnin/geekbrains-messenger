@@ -4,17 +4,28 @@ import logging
 import sys
 from socket import socket, SOCK_STREAM
 
-from storage.server_storage import Storage
+from storage.server_storage import Storage, password_to_md5
 from .metaclasses import ServerVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
-    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, LOGIN_ERROR, LOGIN_OK
 
 import logs.client_log_config
 import logs.server_log_config
 
 client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')
+
+
+def login_required(func):
+    def checker(*args, **kwargs):
+        if args[1]['client_name'] == '':
+            message = 'Попытка выполнить функцию незалогиненым пользователем'
+            print(message)
+            raise TypeError(message)
+        return func(*args, **kwargs)
+
+    return checker
 
 
 class PortDesc:
@@ -70,17 +81,33 @@ class Server(metaclass=ServerVerifier):
                     server_log.error(f'Data not dict {jim_obj}')
                     continue
                 if 'action' in jim_obj.keys():
-                    if jim_obj['action'] == 'presence':
+                    if jim_obj['action'] == 'login':
+                        if 'user' in jim_obj.keys() \
+                                and 'password' in jim_obj.keys():
+                            if self.login(jim_obj['user'], jim_obj['password']):
+                                answer = make_answer(LOGIN_OK)
+                                answer = json.dumps(answer, separators=(',', ':'))
+                                clients_data[sock]['client_name'] = jim_obj['user']
+                                self.storage.history_time_add(
+                                    clients_data[sock]['client_name'],
+                                    clients_data[sock]['client_addr'][0]
+                                )
+                                clients_data[sock]['answ_for_send'].append(answer)
+                                continue
+                        answer = make_answer(LOGIN_ERROR)
+                        answer = json.dumps(answer, separators=(',', ':'))
+                        clients_data[sock]['answ_for_send'].append(answer)
+                    elif jim_obj['action'] == 'presence':
                         if 'user' in jim_obj.keys() \
                                 and isinstance(jim_obj['user'], dict) \
                                 and 'client_name' in jim_obj['user'].keys():
-                            clients_data[sock]['client_name'] = \
-                                jim_obj['user']['client_name']
-                            self.storage.user_add(jim_obj['user']['client_name'])
-                            self.storage.history_time_add(
-                                clients_data[sock]['client_name'],
-                                clients_data[sock]['client_addr'][0]
-                            )
+                            # clients_data[sock]['client_name'] = \
+                            #     jim_obj['user']['client_name']
+                            # self.storage.user_add(jim_obj['user']['client_name'])
+                            # self.storage.history_time_add(
+                            #     clients_data[sock]['client_name'],
+                            #     clients_data[sock]['client_addr'][0]
+                            # )
                             continue
                     elif jim_obj['action'] == 'msg':
                         for _, value in clients_data.items():
@@ -89,10 +116,11 @@ class Server(metaclass=ServerVerifier):
                                     or jim_obj['from'] == value['client_name']:
                                 value['msg_for_send'].append(msg)
                     elif jim_obj['action'] == 'get_contacts':
-                        contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
-                        answer = make_answer(202, {'alert': f'{contact_list}'})
-                        answer = json.dumps(answer, separators=(',', ':'))
-                        clients_data[sock]['answ_for_send'].append(answer)
+                        self.get_contacts(clients_data[sock])
+                        # contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
+                        # answer = make_answer(202, {'alert': f'{contact_list}'})
+                        # answer = json.dumps(answer, separators=(',', ':'))
+                        # clients_data[sock]['answ_for_send'].append(answer)
                     elif jim_obj['action'] == 'add_contact':
                         if self.storage.contact_add(jim_obj['user_login'], jim_obj['user_id']):
                             contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
@@ -113,6 +141,22 @@ class Server(metaclass=ServerVerifier):
                 print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()
                 del clients_data[sock]
+
+    @login_required
+    def get_contacts(self, sock):
+        contact_list = self.storage.contact_list_by_login(sock['client_name'])
+        answer = make_answer(202, {'alert': f'{contact_list}'})
+        answer = json.dumps(answer, separators=(',', ':'))
+        sock['answ_for_send'].append(answer)
+
+    def login(self, user, password):
+        current_user = self.storage.user_by_login(user)
+        if not current_user:
+            self.storage.user_add(user, password_to_md5(password))
+            return True
+        if current_user.password == password_to_md5(password):
+            return True
+        return False
 
 
 def get_server_param():
