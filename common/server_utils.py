@@ -76,6 +76,12 @@ class Server(metaclass=ServerVerifier):
                             if self.login(jim_obj['user'], jim_obj['password']):
                                 answer = make_answer(LOGIN_OK)
                                 answer = json.dumps(answer, separators=(',', ':'))
+                                clients_data[sock]['client_name'] = jim_obj['user']
+                                self.storage.user_add(jim_obj['user'])
+                                self.storage.history_time_add(
+                                    clients_data[sock]['client_name'],
+                                    clients_data[sock]['client_addr'][0]
+                                )
                                 clients_data[sock]['answ_for_send'].append(answer)
                                 continue
                         answer = make_answer(LOGIN_ERROR)
@@ -85,13 +91,13 @@ class Server(metaclass=ServerVerifier):
                         if 'user' in jim_obj.keys() \
                                 and isinstance(jim_obj['user'], dict) \
                                 and 'client_name' in jim_obj['user'].keys():
-                            clients_data[sock]['client_name'] = \
-                                jim_obj['user']['client_name']
-                            self.storage.user_add(jim_obj['user']['client_name'])
-                            self.storage.history_time_add(
-                                clients_data[sock]['client_name'],
-                                clients_data[sock]['client_addr'][0]
-                            )
+                            # clients_data[sock]['client_name'] = \
+                            #     jim_obj['user']['client_name']
+                            # self.storage.user_add(jim_obj['user']['client_name'])
+                            # self.storage.history_time_add(
+                            #     clients_data[sock]['client_name'],
+                            #     clients_data[sock]['client_addr'][0]
+                            # )
                             continue
                     elif jim_obj['action'] == 'msg':
                         for _, value in clients_data.items():

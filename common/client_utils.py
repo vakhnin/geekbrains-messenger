@@ -211,6 +211,10 @@ class Receiver(QtCore.QThread):
         self.storage = None
         self.client_name = client_name
 
+    def set_new_client_name(self, client_name):
+        self.client_name = client_name
+        self.storage = ClientStorage(self.client_name)
+
     def run(self):
         try:
             while True:

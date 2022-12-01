@@ -16,6 +16,7 @@ cur_dir += os.sep
 
 
 class LoginClientGUIWidget(QtWidgets.QWidget):
+    new_client_name_signal = QtCore.pyqtSignal(str)
 
     def __init__(self, client_name, sock, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -24,7 +25,6 @@ class LoginClientGUIWidget(QtWidgets.QWidget):
 
         self.sock = sock
         self.loginLineEdit.setText(self.client_name)
-
         self.submitLoginPushButton.clicked.connect(self.login_func)
 
     def login_func(self):
@@ -36,6 +36,7 @@ class LoginClientGUIWidget(QtWidgets.QWidget):
         if password == '':
             self.errorLoginLabel.setText('Поле password не может быть пустым')
             return
+        self.client_name = login
         login_message = make_login_message(login, password)
 
         msg = json.dumps(login_message, separators=(',', ':'))
@@ -43,6 +44,7 @@ class LoginClientGUIWidget(QtWidgets.QWidget):
 
     def get_server_answer_code(self, code):
         if code == LOGIN_OK:
+            self.new_client_name_signal.emit(self.client_name)
             self.close()
         self.errorLoginLabel.setText('Не верные login/password')
 
