@@ -4,7 +4,7 @@ import logging
 import sys
 from socket import socket, SOCK_STREAM
 
-from storage.server_storage import Storage
+from storage.server_storage import Storage, password_to_md5
 from .metaclasses import ServerVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
@@ -77,7 +77,6 @@ class Server(metaclass=ServerVerifier):
                                 answer = make_answer(LOGIN_OK)
                                 answer = json.dumps(answer, separators=(',', ':'))
                                 clients_data[sock]['client_name'] = jim_obj['user']
-                                self.storage.user_add(jim_obj['user'])
                                 self.storage.history_time_add(
                                     clients_data[sock]['client_name'],
                                     clients_data[sock]['client_addr'][0]
@@ -132,7 +131,11 @@ class Server(metaclass=ServerVerifier):
                 del clients_data[sock]
 
     def login(self, user, password):
-        if password == '12345':
+        current_user = self.storage.user_by_login(user)
+        if not current_user:
+            self.storage.user_add(user, password_to_md5(password))
+            return True
+        if current_user.password == password_to_md5(password):
             return True
         return False
 

@@ -10,11 +10,13 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     login = Column(String)
+    password = Column(String)
     info = Column(String)
 
-    def __init__(self, login, info=''):
+    def __init__(self, login, password, info=''):
         super().__init__()
         self.login = login
+        self.password = password
         self.info = info
 
     def __repr__(self):
