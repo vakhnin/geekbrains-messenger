@@ -126,7 +126,6 @@ class Server(metaclass=ServerVerifier):
                 del clients_data[sock]
 
     def login(self, user, password):
-        print(user, password)
         if password == '12345':
             return True
         return False

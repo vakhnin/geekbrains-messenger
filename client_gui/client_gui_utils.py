@@ -30,7 +30,6 @@ class LoginClientGUIWidget(QtWidgets.QWidget):
         login_message = make_login_message(self.client_name, '12345')
         msg = json.dumps(login_message, separators=(',', ':'))
         self.sock.send(msg.encode(ENCODING))
-        print(login_message)
 
     def get_server_answer_code(self, code):
         print(f'{code} code')
