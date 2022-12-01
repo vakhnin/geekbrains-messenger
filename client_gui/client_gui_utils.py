@@ -7,7 +7,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
 from common.client_utils import message_to_str, make_login_message
-from common.vars import ENCODING
+from common.vars import ENCODING, LOGIN_OK
 from storage.client_storage import ClientStorage
 
 cur_path = os.path.abspath(__file__)
@@ -23,16 +23,28 @@ class LoginClientGUIWidget(QtWidgets.QWidget):
         uic.loadUi(cur_dir + 'client_loginUI.ui', self)
 
         self.sock = sock
+        self.loginLineEdit.setText(self.client_name)
 
-        self.submitLoginPushButton.clicked.connect(self.login)
+        self.submitLoginPushButton.clicked.connect(self.login_func)
 
-    def login(self):
-        login_message = make_login_message(self.client_name, '12345')
+    def login_func(self):
+        login = self.loginLineEdit.text().replace(' ', '')
+        if login == '':
+            self.errorLoginLabel.setText('Поле login не может быть пустым')
+            return
+        password = self.passwordLineEdit.text().replace(' ', '')
+        if password == '':
+            self.errorLoginLabel.setText('Поле password не может быть пустым')
+            return
+        login_message = make_login_message(login, password)
+
         msg = json.dumps(login_message, separators=(',', ':'))
         self.sock.send(msg.encode(ENCODING))
 
     def get_server_answer_code(self, code):
-        print(f'{code} code')
+        if code == LOGIN_OK:
+            self.close()
+        self.errorLoginLabel.setText('Не верные login/password')
 
 
 class ClientGUIWindow(QMainWindow):

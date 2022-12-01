@@ -30,7 +30,7 @@ class MainApp(QtWidgets.QWidget):
 
         login_widget = LoginClientGUIWidget(client_name, self.sock)
         login_widget.show()
-        self.receiver_thread.login_server_answer_code_signal\
+        self.receiver_thread.login_server_answer_code_signal \
             .connect(login_widget.get_server_answer_code)
         app.exec_()
 
