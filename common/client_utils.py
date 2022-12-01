@@ -210,10 +210,12 @@ class Receiver(QtCore.QThread):
         self.sock = sock
         self.storage = None
         self.client_name = client_name
+        self.is_client_name_set = False
 
     def set_new_client_name(self, client_name):
         self.client_name = client_name
         self.storage = ClientStorage(self.client_name)
+        self.is_client_name_set = True
 
     def run(self):
         try:

@@ -37,6 +37,8 @@ class MainApp(QtWidgets.QWidget):
             .connect(self.receiver_thread.set_new_client_name)
         app.exec_()
         self.client_name = self.receiver_thread.client_name
+        if not self.receiver_thread.is_client_name_set:
+            exit(-1)
 
         self.sender_thread = Sender(self.sock, self.client_name)
         self.sender_thread.start()
