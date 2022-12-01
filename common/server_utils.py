@@ -17,6 +17,17 @@ client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')
 
 
+def login_required(func):
+    def checker(*args, **kwargs):
+        if args[1]['client_name'] == '':
+            message = 'Попытка выполнить функцию незалогиненым пользователем'
+            print(message)
+            raise TypeError(message)
+        return func(*args, **kwargs)
+
+    return checker
+
+
 class PortDesc:
     def __init__(self):
         super().__init__()
@@ -105,10 +116,11 @@ class Server(metaclass=ServerVerifier):
                                     or jim_obj['from'] == value['client_name']:
                                 value['msg_for_send'].append(msg)
                     elif jim_obj['action'] == 'get_contacts':
-                        contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
-                        answer = make_answer(202, {'alert': f'{contact_list}'})
-                        answer = json.dumps(answer, separators=(',', ':'))
-                        clients_data[sock]['answ_for_send'].append(answer)
+                        self.get_contacts(clients_data[sock])
+                        # contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
+                        # answer = make_answer(202, {'alert': f'{contact_list}'})
+                        # answer = json.dumps(answer, separators=(',', ':'))
+                        # clients_data[sock]['answ_for_send'].append(answer)
                     elif jim_obj['action'] == 'add_contact':
                         if self.storage.contact_add(jim_obj['user_login'], jim_obj['user_id']):
                             contact_list = self.storage.contact_list_by_login(clients_data[sock]['client_name'])
@@ -129,6 +141,13 @@ class Server(metaclass=ServerVerifier):
                 print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()
                 del clients_data[sock]
+
+    @login_required
+    def get_contacts(self, sock):
+        contact_list = self.storage.contact_list_by_login(sock['client_name'])
+        answer = make_answer(202, {'alert': f'{contact_list}'})
+        answer = json.dumps(answer, separators=(',', ':'))
+        sock['answ_for_send'].append(answer)
 
     def login(self, user, password):
         current_user = self.storage.user_by_login(user)
