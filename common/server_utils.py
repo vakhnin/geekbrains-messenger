@@ -8,7 +8,7 @@ from storage.server_storage import Storage
 from .metaclasses import ServerVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, NOT_BYTES, \
-    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS
+    NOT_DICT, NO_ACTION, NO_TIME, BROKEN_JIM, UNKNOWN_ACTION, MAX_CONNECTIONS, LOGIN_ERROR, LOGIN_OK
 
 import logs.client_log_config
 import logs.server_log_config
@@ -70,7 +70,18 @@ class Server(metaclass=ServerVerifier):
                     server_log.error(f'Data not dict {jim_obj}')
                     continue
                 if 'action' in jim_obj.keys():
-                    if jim_obj['action'] == 'presence':
+                    if jim_obj['action'] == 'login':
+                        if 'user' in jim_obj.keys() \
+                                and 'password' in jim_obj.keys():
+                            if self.login(jim_obj['user'], jim_obj['password']):
+                                answer = make_answer(LOGIN_OK)
+                                answer = json.dumps(answer, separators=(',', ':'))
+                                clients_data[sock]['answ_for_send'].append(answer)
+                                continue
+                        answer = make_answer(LOGIN_ERROR)
+                        answer = json.dumps(answer, separators=(',', ':'))
+                        clients_data[sock]['answ_for_send'].append(answer)
+                    elif jim_obj['action'] == 'presence':
                         if 'user' in jim_obj.keys() \
                                 and isinstance(jim_obj['user'], dict) \
                                 and 'client_name' in jim_obj['user'].keys():
@@ -113,6 +124,12 @@ class Server(metaclass=ServerVerifier):
                 print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()
                 del clients_data[sock]
+
+    def login(self, user, password):
+        print(user, password)
+        if password == '12345':
+            return True
+        return False
 
 
 def get_server_param():

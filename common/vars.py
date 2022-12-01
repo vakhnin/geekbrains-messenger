@@ -16,3 +16,5 @@ NO_ACTION = 'Request has no "action"'
 NO_TIME = 'Request has no "time""'
 BROKEN_JIM = 'JSON broken'
 UNKNOWN_ACTION = 'Unknown action'
+LOGIN_ERROR = 405
+LOGIN_OK = 205

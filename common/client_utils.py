@@ -12,7 +12,7 @@ from PyQt5.QtCore import pyqtSignal
 from storage.client_storage import ClientStorage
 from .metaclasses import ClientVerifier
 from .utils import Log
-from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING
+from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, LOGIN_OK, LOGIN_ERROR
 
 import logs.client_log_config
 import logs.server_log_config
@@ -66,6 +66,15 @@ def make_presence_message(client_name, status):
             'client_name': client_name,
             'status': status,
         }
+    }
+
+
+def make_login_message(client_name, password):
+    return {
+        'action': 'login',
+        'time': str(datetime.datetime.now()),
+        'user': client_name,
+        'password': password,
     }
 
 
@@ -192,17 +201,18 @@ class Sender(QtCore.QThread):
 
 
 class Receiver(QtCore.QThread):
+    login_server_answer_code_signal = QtCore.pyqtSignal(int)
     new_message_signal = QtCore.pyqtSignal(object)
     new_contact_list_signal = QtCore.pyqtSignal(object)
 
     def __init__(self, sock, client_name, parent=None):
         QtCore.QThread.__init__(self, parent)
         self.sock = sock
+        self.storage = None
         self.client_name = client_name
 
     def run(self):
         try:
-            storage = ClientStorage(self.client_name)
             while True:
                 data = self.sock.recv(MAX_PACKAGE_LENGTH)
                 if not data:
@@ -223,12 +233,15 @@ class Receiver(QtCore.QThread):
                         contact_list = json.loads(contact_list)
                         self.new_contact_list_signal.emit(contact_list)
                         print(f'Список контактов: {jim_obj["alert"]}')
+                    elif jim_obj['response'] in (LOGIN_OK, LOGIN_ERROR):
+                        self.login_server_answer_code_signal.emit(jim_obj['response'])
                     continue
                 if 'action' in jim_obj.keys():
                     if jim_obj['action'] == 'msg':
                         print(message_to_str(jim_obj, self.client_name))
-                        storage.add_message(jim_obj['from'],
-                                            jim_obj['to'], jim_obj['time'], jim_obj['message'])
-                        self.new_message_signal.emit(jim_obj)
+                        if self.storage:
+                            self.storage.add_message(jim_obj['from'],
+                                                     jim_obj['to'], jim_obj['time'], jim_obj['message'])
+                            self.new_message_signal.emit(jim_obj)
         except Exception as e:
             client_log.debug(f'Ошибка входного потока{e}')

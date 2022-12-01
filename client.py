@@ -25,14 +25,18 @@ class MainApp(QtWidgets.QWidget):
         self.client_name = client_name
         self.sock = self.make_socket(address, port)
 
-        login_widget = LoginClientGUIWidget(client_name)
+        self.receiver_thread = Receiver(self.sock, client_name)
+        self.receiver_thread.start()
+
+        login_widget = LoginClientGUIWidget(client_name, self.sock)
         login_widget.show()
+        self.receiver_thread.login_server_answer_code_signal\
+            .connect(login_widget.get_server_answer_code)
         app.exec_()
 
         self.sender_thread = Sender(self.sock, client_name)
         self.sender_thread.start()
-        self.receiver_thread = Receiver(self.sock, client_name)
-        self.receiver_thread.start()
+
         self.receiver_thread.new_message_signal.connect(self.new_messages_received)
         self.receiver_thread.new_contact_list_signal.connect(self.new_contact_list_received)
 
@@ -40,6 +44,7 @@ class MainApp(QtWidgets.QWidget):
         self.main_window.show()
         self.main_window.send_message_signal.connect(self.send_message)
         self.main_window.contact_list_signal.connect(self.contact_list_command)
+        app.exec_()
 
     def new_contact_list_received(self, contact_list):
         self.main_window.new_contact_list_signal.emit(contact_list)

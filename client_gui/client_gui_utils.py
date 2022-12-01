@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -5,7 +6,8 @@ from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
-from common.client_utils import message_to_str
+from common.client_utils import message_to_str, make_login_message
+from common.vars import ENCODING
 from storage.client_storage import ClientStorage
 
 cur_path = os.path.abspath(__file__)
@@ -14,10 +16,24 @@ cur_dir += os.sep
 
 
 class LoginClientGUIWidget(QtWidgets.QWidget):
-    def __init__(self, client_name, parent=None):
+
+    def __init__(self, client_name, sock, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.client_name = client_name
         uic.loadUi(cur_dir + 'client_loginUI.ui', self)
+
+        self.sock = sock
+
+        self.submitLoginPushButton.clicked.connect(self.login)
+
+    def login(self):
+        login_message = make_login_message(self.client_name, '12345')
+        msg = json.dumps(login_message, separators=(',', ':'))
+        self.sock.send(msg.encode(ENCODING))
+        print(login_message)
+
+    def get_server_answer_code(self, code):
+        print(f'{code} code')
 
 
 class ClientGUIWindow(QMainWindow):
