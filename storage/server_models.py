@@ -55,8 +55,7 @@ class Contact(Base):
         return f'<Contact({self.id}, {self.user_id}, {self.contact_user_id})>'
 
 
-cur_path = os.path.abspath(__file__)
-cur_dir, _ = os.path.split(cur_path)
+cur_dir = os.getcwd()
 cur_dir += os.sep
 engine = create_engine(f'sqlite:///{cur_dir}server_db.sqlite', pool_recycle=7200)
 Base.metadata.create_all(engine)

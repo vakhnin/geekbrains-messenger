@@ -6,8 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 from storage.server_models import engine
 from storage.server_storage import Storage
 
-cur_path = os.path.abspath(__file__)
-cur_dir, _ = os.path.split(cur_path)
+cur_dir = os.getcwd()
 cur_dir += os.sep
 
 

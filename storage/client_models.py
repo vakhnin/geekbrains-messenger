@@ -25,6 +25,5 @@ class Message(Base):
         return f'<Message({self.id}, {self.user_from}, {self.user_to}, {self.time}, {self.msg})>'
 
 
-cur_path = os.path.abspath(__file__)
-cur_dir, _ = os.path.split(cur_path)
+cur_dir = os.getcwd()
 client_db_dir = cur_dir + os.sep
