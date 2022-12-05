@@ -1,4 +1,6 @@
 import os
+from inspect import getsourcefile
+from os.path import abspath
 
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import declarative_base
@@ -55,7 +57,8 @@ class Contact(Base):
         return f'<Contact({self.id}, {self.user_id}, {self.contact_user_id})>'
 
 
-cur_dir = os.getcwd()
+cur_path = abspath(getsourcefile(lambda: 0))
+cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
 engine = create_engine(f'sqlite:///{cur_dir}server_db.sqlite', pool_recycle=7200)
 Base.metadata.create_all(engine)

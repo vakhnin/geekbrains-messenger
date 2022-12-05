@@ -1,6 +1,8 @@
 import json
 import os
 import sys
+from inspect import getsourcefile
+from os.path import abspath
 
 from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtCore import QTimer
@@ -10,7 +12,7 @@ from common.client_utils import message_to_str, make_login_message
 from common.vars import ENCODING, LOGIN_OK
 from storage.client_storage import ClientStorage
 
-cur_path = os.path.abspath(__file__)
+cur_path = abspath(getsourcefile(lambda: 0))
 cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
 

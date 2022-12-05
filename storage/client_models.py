@@ -1,4 +1,6 @@
 import os
+from inspect import getsourcefile
+from os.path import abspath
 
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import declarative_base
@@ -25,5 +27,6 @@ class Message(Base):
         return f'<Message({self.id}, {self.user_from}, {self.user_to}, {self.time}, {self.msg})>'
 
 
-cur_dir = os.getcwd()
+cur_path = abspath(getsourcefile(lambda: 0))
+cur_dir, _ = os.path.split(cur_path)
 client_db_dir = cur_dir + os.sep
