@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>588</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Messanger Client</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>801</width>
+      <height>751</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Общий чат</string>
+     </attribute>
+     <widget class="QLabel" name="clientNameLabel">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>381</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Привет &lt;unknown&gt;!</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="commonChatListWidget">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>40</y>
+        <width>491</width>
+        <height>441</height>
+       </rect>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>490</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Ваше сообщение:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="commonMessageLineEdit">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>510</y>
+        <width>401</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="commonMessageSendButton">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>510</y>
+        <width>81</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Отправить</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Контакты и приватные чаты</string>
+     </attribute>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>251</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Список контактов</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="contactListWidget">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>40</y>
+        <width>251</width>
+        <height>401</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="privateChatListWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>40</y>
+        <width>481</width>
+        <height>401</height>
+       </rect>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="isWrapping" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+      <item>
+       <property name="text">
+        <string>Для добавления контакта введите слева имя контакта и нажмите кнопку &quot;Добавить&quot;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Для открытия приватного чата сделайте двойной клик по имени контакта в списке контактов слева</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="headerPrivateChatLabel">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>10</y>
+        <width>471</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Приватный чат</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>460</y>
+        <width>251</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Имя контакта:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="contactLineEdit">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>480</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addContactButton">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>510</y>
+        <width>111</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Добавить</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="delContactButton">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>510</y>
+        <width>111</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Удалить</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="privateMessageLineEdit">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>480</y>
+        <width>381</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="privateMessageSendButton">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>480</y>
+        <width>81</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Отправить</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>460</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Ваше сообщение:</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
