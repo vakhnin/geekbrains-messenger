@@ -3,9 +3,6 @@ import logging
 import sys
 import traceback
 
-import logs.client_log_config
-import logs.server_log_config
-
 client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')
 

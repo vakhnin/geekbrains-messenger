@@ -7,13 +7,11 @@ import sys
 
 from PyQt5 import QtCore
 
-from ..storage.client_storage import ClientStorage
+sys.path.append('..')
+from storage.client_storage import ClientStorage
 from .metaclasses import ClientVerifier
 from .utils import Log
 from .vars import DEFAULT_PORT, MAX_PACKAGE_LENGTH, ENCODING, LOGIN_OK, LOGIN_ERROR
-
-import logs.client_log_config
-import logs.server_log_config
 
 client_log = logging.getLogger('messenger.client')
 server_log = logging.getLogger('messenger.server')

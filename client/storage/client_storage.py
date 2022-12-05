@@ -1,7 +1,10 @@
+import sys
+
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import Session
 
-from ..storage.client_models import client_db_dir, Base, Message
+sys.path.append('..')
+from storage.client_models import client_db_dir, Base, Message
 
 
 class ClientStorage:

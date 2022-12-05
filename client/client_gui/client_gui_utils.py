@@ -8,9 +8,10 @@ from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
-from ..common.client_utils import message_to_str, make_login_message
-from ..common.vars import ENCODING, LOGIN_OK
-from ..storage.client_storage import ClientStorage
+sys.path.append('..')
+from common.client_utils import message_to_str, make_login_message
+from common.vars import ENCODING, LOGIN_OK
+from storage.client_storage import ClientStorage
 
 cur_path = abspath(getsourcefile(lambda: 0))
 cur_dir, _ = os.path.split(cur_path)
