@@ -1,14 +1,16 @@
 import os
+import sys
 from inspect import getsourcefile
 from os.path import abspath
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 
+sys.path.append('..')
 from storage.server_models import engine
 from storage.server_storage import Storage
 
-cur_path = abspath(getsourcefile(lambda:0))
+cur_path = abspath(getsourcefile(lambda: 0))
 cur_dir, _ = os.path.split(cur_path)
 cur_dir += os.sep
 

@@ -2,7 +2,7 @@ import os
 from inspect import getsourcefile
 from os.path import abspath
 
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()

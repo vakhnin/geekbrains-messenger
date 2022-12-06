@@ -1,18 +1,14 @@
 import json
 import logging
 import sys
-import threading
-import time
 from socket import socket, AF_INET, SOCK_STREAM
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtWidgets
 
-from client_gui.client_gui_utils import start_client_window, ClientGUIWindow, LoginClientGUIWidget
-from common.client_utils import make_presence_message, \
-    send_message_take_answer, parse_args, Client, Receiver, Sender, make_msg_message, make_get_contacts_message, \
-    make_add_contact_message, make_del_contact_message
+sys.path.append('.')
+from client_gui.client_gui_utils import ClientGUIWindow, LoginClientGUIWidget
+from common.client_utils import parse_args, Client, Receiver, Sender, make_msg_message, \
+    make_get_contacts_message, make_add_contact_message, make_del_contact_message
 import logs.client_log_config
 from common.vars import ENCODING
 
